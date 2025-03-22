@@ -1,0 +1,10 @@
+output*/
+*.sublime-*
+doxydoc/
+.vscode
+temp/
+test_js_client/
+gen/
+__pycache__
+/venv
+/.idea
