@@ -1,30 +1,18 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import SignUpForm, LoginForm
+from django.shortcuts import render
+from django.contrib.auth import decorators
+from .forms import SignUpForm
+from django.views.generic.edit import FormView
 # Create your views here.
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save()  # Сохраняем нового пользователя
-            login(request, user)  # Выполняем вход
-            return redirect('home')  # Перенаправляем на главную страницу
-    else:
-        form = SignUpForm()
-    return render(request, 'user/signup.html', {'form': form})
-
-def login_view(request):
-    form = LoginForm(data=request.POST or None)
-    if request.method == 'POST':
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)  # Проверяем учетные данные
-            if user is not None:
-                login(request, user)  # Выполняем вход
-                return redirect('home')  # Перенаправляем на главную страницу
-    return render(request, 'user/login.html', {'form': form})
-
+@decorators.login_required
 def home(request):
     return render(request, 'user/home.html')
+
+class SignUpView(FormView):
+    form_class = SignUpForm
+    template_name = 'registration/signup.html'
+    success_url = '/user'
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
