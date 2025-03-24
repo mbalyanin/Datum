@@ -43,10 +43,7 @@
         {% if user.is_authenticated %}
             <h1>Добро пожаловать, {{ user.email }}!</h1>
             <p>Вы успешно вошли в систему.</p>
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn">Выйти</button>
-            </form>
+            <a href="{% url 'profile' %}" class="btn">Перейти в профиль</a>
         {% else %}
             <h1>Добро пожаловать!</h1>
             <p>Пожалуйста, войдите в систему.</p>

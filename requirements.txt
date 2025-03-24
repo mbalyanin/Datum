@@ -4,3 +4,7 @@ django-otp
 pyotp
 drf-yasg
 qrcode
+pillow
+django-allauth
+requests
+jwt

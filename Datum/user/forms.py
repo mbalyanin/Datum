@@ -25,16 +25,25 @@ class AuthenticationForm(AuthenticationForm):
 
         if username is not None and password:
             self.user_cache = authenticate(self.request, username=username, password=password)
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
             if not self.user_cache.email_verify:
                 send_email_for_verify(self.request, self.user_cache)
                 raise ValidationError(
                     'Email not verify! Check your email!',
                     code='invalid_login',
                 )
-            if self.user_cache is None:
-                raise self.get_invalid_login_error()
-            else:
-                self.confirm_login_allowed(self.user_cache)
+
+            if hasattr(self.user_cache, 'mfa_enabled') and self.user_cache.mfa_enabled:
+                # Сохраняем частично аутентифицированного пользователя в сессии
+                self.request.session['mfa_user_id'] = self.user_cache.id
+                self.request.session['mfa_backend'] = self.user_cache.backend
+                raise ValidationError(
+                    'MFA verification required',
+                    code='mfa_required',
+                )
+            self.confirm_login_allowed(self.user_cache)
+
         return self.cleaned_data
 
 class UserCreationForm(UserCreationForm):
