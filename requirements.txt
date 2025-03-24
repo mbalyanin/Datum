@@ -3,3 +3,4 @@ djangorestframework
 django-otp
 pyotp
 drf-yasg
+qrcode

@@ -9,6 +9,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.contrib.auth.tokens import default_token_generator as token_generator
+import pyotp
 # Create your views here.
 
 User = get_user_model()
@@ -53,7 +54,6 @@ class EmailVerify(View):
     @staticmethod
     def get_user(uidb64):
         try:
-            # urlsafe_base64_decode() decodes to bytestring
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError,
@@ -63,3 +63,39 @@ class EmailVerify(View):
 
 class UserLoginView(LoginView):
     form_class = AuthenticationForm
+
+
+class MfaVerify(View):
+
+    def verify_2fa_otp(self, user, otp):
+        totp = pyotp.TOTP(user.mfa_secret)
+        if totp.verify(otp):
+            user.mfa_enabled = True
+            user.save()
+            return True
+        return False
+
+    def post(self, request):
+        otp = request.POST.get('otp_code')
+        user_id = request.POST.get('user_id')
+        if not user_id:
+            messages.error(request, 'Invalid user id. Please try again.')
+            return render(request, 'otp_verify.html', {'user_id': user_id})
+
+        user = User.objects.get(id=user_id)
+        if verify_2fa_otp(user, otp):
+            if request.user.is_authenticated:
+                messages.success(request, '2FA enabled successfully !')
+                return redirect('profile')
+
+            login(request, user)
+            messages.success(request, 'Login successful!')
+            return redirect('profile')
+        else:
+            if request.user.is_authenticated:
+                messages.error(request, 'Invalid OTP code. Please try again.')
+                return redirect('profile')
+            messages.error(request, 'Invalid OTP code. Please try again.')
+            return render(request, 'otp_verify.html', {'user_id': user_id})
+
+    return render(request, 'otp_verify.html', {'user_id': user_id})

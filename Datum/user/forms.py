@@ -9,7 +9,16 @@ from .utils import send_email_for_verify
 User = get_user_model()
 
 class AuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
+        self.fields['username'].widget.attrs.update({
+            'placeholder': _("Введите ваш email")
+        })
+
+        self.fields['password'].widget.attrs.update({
+            'placeholder': _("Введите пароль")
+        })
     def clean(self):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
@@ -32,8 +41,21 @@ class UserCreationForm(UserCreationForm):
     email = forms.EmailField(
         label=_("Email"),
         max_length=254,
-        widget=forms.EmailInput(attrs={"autocomplete": "email"}),
+        widget=forms.EmailInput(attrs={
+            "autocomplete": "email",
+            "placeholder": _("Введите ваш email"),
+        }),
     )
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ('email',)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['password1'].widget.attrs.update({
+            'placeholder': _("Придумайте пароль")
+        })
+
+        self.fields['password2'].widget.attrs.update({
+            'placeholder': _("Повторите пароль")
+        })
