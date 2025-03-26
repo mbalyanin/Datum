@@ -29,6 +29,7 @@ class ProfileView(LoginRequiredMixin, View):
         if not user.mfa_secret:
             user.mfa_secret = pyotp.random_base32()
             user.save()
+
         otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(
             name=user.email,
             issuer_name="Datum"
@@ -42,6 +43,7 @@ class ProfileView(LoginRequiredMixin, View):
 
         qr_code_data_uri = f"data:image/png;base64,{qr_code}"
         return render(request, self.template_name, {"qrcode": qr_code_data_uri})
+
 class SignUpView(View):
     template_name = 'registration/signup.html'
 
@@ -49,11 +51,13 @@ class SignUpView(View):
         if request.user.is_authenticated:  # Если пользователь уже вошёл
             return redirect('profile')  # Перенаправляем на профиль
         return super().dispatch(request, *args, **kwargs)
+
     def get(self, request):
         context = {
             'form': UserCreationForm()
         }
         return render(request, self.template_name, context)
+
     def post(self, request):
         form = UserCreationForm(request.POST)
 

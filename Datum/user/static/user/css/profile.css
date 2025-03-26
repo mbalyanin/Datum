@@ -1,0 +1,79 @@
+ /* Add your custom styles here */
+        body {
+            background: url('../img/fon.png');
+            background-size: cover;
+        }
+
+        .btn{
+            width: 200px; /* Ширина кнопки */
+            padding: 10px;
+            background: #6a11cb; /* Фиолетовый фон */
+            color: #000000; /* Белый текст */
+            border-radius: 25px; /* Закругленная кнопка */
+            font-size: 16px;
+            cursor: pointer;
+            border-color: #000096; /* Синяя рамка при фокусе */
+            background: #0000BA; /* Градиентный фон */
+        }
+
+        .reg-container {
+            background: #0000CF;
+            padding: 30px 40px;
+            border-radius: 50px;
+            width: 400px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Центрируем дочерние элементы по горизонтали */
+            justify-content: center; /* Центрируем по вертикали */
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center; /* Центрируем текст внутри */
+        }
+
+button:hover {
+    border-color: #fffacd; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA; /* Градиентный фон */
+    transform: scale(1.01);
+}
+
+
+
+.form-control {
+    width: 120px; /* Ширина поля ввода */
+    padding: 5px;
+    border: 2px solid #2575fc; /* Синяя рамка */
+    border-radius: 0px; /* Закругленные углы */
+    font-size: 16px;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
+    text-align: center;
+    border-color: #000096; /* Синяя рамка при фокусе */
+    background: #0000BA; /* Градиентный фон */
+    margin: 0px 175px
+}
+.form-control:hover {
+    border-color: #fffacd; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA; /* Градиентный фон */
+    transform: scale(1.01);
+}
+
+
+
+
+
+/* Анимация появления формы */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+

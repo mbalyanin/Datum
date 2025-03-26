@@ -1,69 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .signup-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-        .signup-container h2 {
-            margin-bottom: 20px;
-        }
-        .signup-container input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .signup-container button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .signup-container button:hover {
-            background-color: #218838;
-        }
-        .signup-container a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .signup-container a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <title>Login Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'user/css/registration.css' %}">
+
 </head>
 <body>
-    <div class="signup-container">
-        <h2>Регистрация</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.email }}<br>
-            {{ form.password1 }}<br>
-            {{ form.password2 }}<br>
-            <button type="submit">Зарегистрироваться</button>
-        </form>
-        <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+    <div class="container">
+        <div class="images-grid">
+            <div class="image-item">
+                <img src="{% static 'user/img/cat.jpg' %}" alt="Image 1">
+            </div>
+            <div class="image-item">
+                <img src="{% static 'user/img/cat2.jpg' %}" alt="Image 2">
+            </div>
+            <div class="image-item">
+                <img src="{% static 'user/img/cat3.jpg' %}" alt="Image 3">
+            </div>
+            <div class="image-item">
+                <img src="{% static 'user/img/cat4.jpg' %}" alt="Image 4">
+            </div>
+        </div>
+
+        <div class="reg-section">
+            <div class="reg-container">
+                <div class="reg-box">
+                    <h2>Регистрация</h2>
+                    <form class="reg-form" method="post">
+                         {% csrf_token %}
+                        <div class="input-group username-group">
+                            {{ form.email }}
+                        </div>
+                        <div class="input-group password1-group">
+                            {{ form.password1 }}
+                        </div>
+                        <div class="input-group password2-group">
+                            {{ form.password2 }}
+                        </div>
+                        <button type="submit">Зарегистрироваться</button>
+                    </form>
+                    <div class="login-link">
+                        <p>Вы уже смешарик? <a href="/user/login/">Войти</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

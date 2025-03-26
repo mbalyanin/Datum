@@ -13,11 +13,17 @@ class AuthenticationForm(AuthenticationForm):
         super().__init__(*args, **kwargs)
 
         self.fields['username'].widget.attrs.update({
-            'placeholder': _("Введите ваш email")
+            'placeholder': "Введите ваш email",
+            'type': "text",
+            'id': "username",
+            'name': "username"
         })
 
         self.fields['password'].widget.attrs.update({
-            'placeholder': _("Введите пароль")
+            'placeholder': "Give me your password",
+            'type': "password",
+            'id': "password",
+            'name': "password"
         })
     def clean(self):
         username = self.cleaned_data.get('username')
@@ -57,14 +63,27 @@ class UserCreationForm(UserCreationForm):
     )
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('email',)
+        fields = ('email', 'password1', 'password2')
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields['email'].widget.attrs.update({
+            'placeholder': "Введите ваш email",
+            'id': "username",
+            'name': "username",
+            'type': "text",
+        })
+
         self.fields['password1'].widget.attrs.update({
-            'placeholder': _("Придумайте пароль")
+            'placeholder': "Придумайте пароль",
+            'id': "password1",
+            'name': "password",
+            'type': "password",
         })
 
         self.fields['password2'].widget.attrs.update({
-            'placeholder': _("Повторите пароль")
+            'placeholder': "Повторите пароль",
+            'id': "password2",
+            'name': "password",
+            'type': "password",
         })
