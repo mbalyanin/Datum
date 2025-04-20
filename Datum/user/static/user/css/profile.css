@@ -1,55 +1,53 @@
  /* Add your custom styles here */
-        body {
-            background: url('../img/fon.png');
-            background-size: cover;
+body {
+    background: #111111;
+    background-size: cover;
+}
 
-        }
+.btn, btn-submit{
+    width: 200px;
+    padding: 10px;
+    background: #2b2b2b;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border-color: #3c3c3c;
+    background: #2b2b2b;
+}
 
-        .btn, btn-submit{
-            width: 200px;
-            padding: 10px;
-            background: #6a11cb;
-            color: #000000;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            border-color: #000096;
-            background: #0000BA;
-        }
-
-        .reg-container {
-            background: #0000CF;
-            padding: 30px 40px;
-            border-radius: 50px;
-            width: 450px;
-            color: black;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Центрируем дочерние элементы по горизонтали */
-            justify-content: center; /* Центрируем по вертикали */
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center; /* Центрируем текст внутри */
-        }
+.reg-container {
+    background: #222222;
+    padding: 30px 40px;
+    border: 1px solid #444444; /* Добавлено */
+    border-radius: 5px;
+    width: 450px;
+    color: white;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем дочерние элементы по горизонтали */
+    justify-content: center; /* Центрируем по вертикали */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center; /* Центрируем текст внутри */
+}
 
 
 
 
 button:hover {
-    border-color: #fffacd; /* Синяя рамка при фокусе */
-    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
-    background: #0000BA; /* Градиентный фон */
-    transform: scale(1.01);
+    border-color: #3c3c3c;
+    background: #333333; /* Градиентный фон */
 }
 
 
 
 .form-control {
-    color: black;
+    color: white;
     width: 120px; /* Ширина поля ввода */
     padding: 5px;
     border: 2px solid #2575fc; /* Синяя рамка */
@@ -57,12 +55,12 @@ button:hover {
     font-size: 16px;
     transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
     text-align: center;
-    border-color: #000096;
+    border-color: #3c3c3c;
     background: #3636FF;
     margin: 0px 175px
 }
 .form-control:hover {
-    border-color: #fffacd; /* Синяя рамка при фокусе */
+    border-color: #3c3c3c;
     box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
     background: #5555FF; /* Градиентный фон */
     transform: scale(1.01);
@@ -72,18 +70,29 @@ button:hover {
     font-size: 14px;
 }
 
-
-
-
-
-/* Анимация появления формы */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.left_box {
+    background: #212121;
+    padding: 30px 40px;
+    border: 1px solid #444444; /* Добавлено */
+    border-radius: 5px;
+    width: 150px;
+    color: white;
+    min-height: 400px;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    margin-top: 130px;
 }
 
+.range-container {
+  display: flex;
+  align-items: center; /* выравнивание по вертикали */
+  gap: 10px; /* расстояние между элементами */
+}
 
+.filter-container {
+  margin-bottom: 20px; /* расстояние между блоками */
+}

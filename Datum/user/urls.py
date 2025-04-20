@@ -1,6 +1,6 @@
 from django.urls import path, include
 from .views import SignUpView, EmailVerify, UserLoginView, MfaVerify, ProfileView,\
-    MfaDisable
+    MfaDisable, MfaView, TapeView, FiltersView
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -12,4 +12,8 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('verify_mfa/', MfaVerify.as_view(), name='verify_mfa'),
     path('disable_2fa/', MfaDisable.as_view(), name='disable_2fa'),
+    path('settings/', ProfileView.as_view(), name='settings'),
+    path('mfa/', MfaView.as_view(), name='mfa'),
+    path('tape/', TapeView.as_view(), name='tape'),
+    path('filters/', FiltersView.as_view(), name='filters'),
 ]

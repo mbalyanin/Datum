@@ -29,27 +29,8 @@ User = get_user_model()
 
 class ProfileView(LoginRequiredMixin, APIView):
     template_name = 'user/profile.html'
-    login_url = '/user/login/'
-    redirect_field_name = 'next'
     def get(self, request):
-        user = request.user
-        if not user.mfa_secret:
-            user.mfa_secret = pyotp.random_base32()
-            user.save()
-
-        otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(
-            name=user.email,
-            issuer_name="Datum"
-        )
-        qr = qrcode.make(otp_uri)
-        buffer = io.BytesIO()
-        qr.save(buffer, format="PNG")
-
-        buffer.seek(0)
-        qr_code = base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-        qr_code_data_uri = f"data:image/png;base64,{qr_code}"
-        return render(request, self.template_name, {"qrcode": qr_code_data_uri})
+        return render(request, self.template_name)
 
 
 class SignUpView(APIView):
@@ -198,3 +179,38 @@ class MfaDisable(LoginRequiredMixin, APIView):
         else:
             messages.info(request, "2FA is already disabled.")
         return redirect('profile')
+
+class MfaView(APIView):
+    template_name = 'user/mfa.html'
+    def get(self, request):
+        user = request.user
+        if not user.mfa_secret:
+            user.mfa_secret = pyotp.random_base32()
+            user.save()
+
+        otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(
+            name=user.email,
+            issuer_name="Datum"
+        )
+        qr = qrcode.make(otp_uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format="PNG")
+
+        buffer.seek(0)
+        qr_code = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        qr_code_data_uri = f"data:image/png;base64,{qr_code}"
+
+        return render(request, self.template_name, {"qrcode": qr_code_data_uri})
+
+
+class TapeView(APIView):
+    template_name = 'user/tape.html'
+    def get(self, request):
+        return render(request, self.template_name)
+
+
+class FiltersView(APIView):
+    template_name = 'user/filters.html'
+    def get(self, request):
+        return render(request, self.template_name)

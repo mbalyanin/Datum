@@ -1,0 +1,39 @@
+{% extends 'registration/base.html' %}
+{% block title %}Profile - YourApp {% endblock %}
+
+{% block content %}
+
+<div class="reg-container">
+
+  <div class="filter-container">
+      <label for="age_min">Возраст</label>
+      <div class="range-container">
+        <label for="age_min">от</label>
+        <input type="number" id="age_min" name="age_min" min="12" max="60" value="18">
+        <label for="age_max">до</label>
+        <input type="number" id="age_max" name="age_max" min="12" max="60" value="30">
+      </div>
+  </div>
+
+  <div class="filter-container">
+      <label for="age_min">Рост</label>
+      <div class="range-container">
+        <label for="length_min">от</label>
+        <input type="number" id="length_min" name="length_min" min="100" max="220" value="150">
+        <label for="length_max">до</label>
+        <input type="number" id="length_max" name="length_max" min="100" max="220" value="180">
+      </div>
+  </div>
+
+      <form action="{% url 'tape' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="btn">Сохранить</button>
+    </form>
+      <form action="{% url 'tape' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="btn">Не сохранять</button>
+    </form>
+
+</div>
+
+{% endblock %}
