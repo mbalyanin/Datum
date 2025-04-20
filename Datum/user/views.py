@@ -1,5 +1,11 @@
 import io
 import base64
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
@@ -18,9 +24,10 @@ import qrcode
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
+
 User = get_user_model()
 
-class ProfileView(LoginRequiredMixin, View):
+class ProfileView(LoginRequiredMixin, APIView):
     template_name = 'user/profile.html'
     login_url = '/user/login/'
     redirect_field_name = 'next'
@@ -44,7 +51,8 @@ class ProfileView(LoginRequiredMixin, View):
         qr_code_data_uri = f"data:image/png;base64,{qr_code}"
         return render(request, self.template_name, {"qrcode": qr_code_data_uri})
 
-class SignUpView(View):
+
+class SignUpView(APIView):
     template_name = 'registration/signup.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -73,8 +81,7 @@ class SignUpView(View):
         }
         return render(request, self.template_name, context)
 
-class EmailVerify(View):
-
+class EmailVerify(APIView):
     def get(self, request, uidb64, token):
         user = self.get_user(uidb64)
 
@@ -94,6 +101,7 @@ class EmailVerify(View):
                 User.DoesNotExist, ValidationError):
             user = None
         return user
+
 
 class UserLoginView(LoginView):
     form_class = AuthenticationForm
@@ -122,8 +130,30 @@ class UserLoginView(LoginView):
                 })
         return super().form_invalid(form)
 
-class MfaVerify(View):
 
+class UserLoginViewAPI(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="User login (Django form-based)",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description="User email"),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description="User password"),
+            },
+            required=['email', 'password'],
+        ),
+        responses={
+            200: openapi.Response("Login successful!"),
+            401: openapi.Response("Invalid credentials or MFA required"),
+        }
+    )
+    def post(self, request):
+        return Response({"detail": "This is a Swagger-only view. Use /user/login/ instead."})
+
+
+class MfaVerify(APIView):
     @staticmethod
     def verify_2fa_otp(user, otp):
         totp = pyotp.TOTP(user.mfa_secret)
@@ -156,8 +186,8 @@ class MfaVerify(View):
             messages.error(request, 'Invalid OTP code. Please try again.')
             return render(request, 'registration/otp_verify.html', {'user_id': user_id})
 
-class MfaDisable(LoginRequiredMixin, View):
 
+class MfaDisable(LoginRequiredMixin, APIView):
     def get(self, request):
         user = request.user
         if user.mfa_enabled:

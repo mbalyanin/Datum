@@ -2,25 +2,27 @@
         body {
             background: url('../img/fon.png');
             background-size: cover;
+
         }
 
-        .btn{
-            width: 200px; /* Ширина кнопки */
+        .btn, btn-submit{
+            width: 200px;
             padding: 10px;
-            background: #6a11cb; /* Фиолетовый фон */
-            color: #000000; /* Белый текст */
-            border-radius: 25px; /* Закругленная кнопка */
+            background: #6a11cb;
+            color: #000000;
+            border-radius: 25px;
             font-size: 16px;
             cursor: pointer;
-            border-color: #000096; /* Синяя рамка при фокусе */
-            background: #0000BA; /* Градиентный фон */
+            border-color: #000096;
+            background: #0000BA;
         }
 
         .reg-container {
             background: #0000CF;
             padding: 30px 40px;
             border-radius: 50px;
-            width: 400px;
+            width: 450px;
+            color: black;
             min-height: 400px;
             display: flex;
             flex-direction: column;
@@ -34,6 +36,9 @@
             text-align: center; /* Центрируем текст внутри */
         }
 
+
+
+
 button:hover {
     border-color: #fffacd; /* Синяя рамка при фокусе */
     box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
@@ -44,6 +49,7 @@ button:hover {
 
 
 .form-control {
+    color: black;
     width: 120px; /* Ширина поля ввода */
     padding: 5px;
     border: 2px solid #2575fc; /* Синяя рамка */
@@ -51,15 +57,19 @@ button:hover {
     font-size: 16px;
     transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
     text-align: center;
-    border-color: #000096; /* Синяя рамка при фокусе */
-    background: #0000BA; /* Градиентный фон */
+    border-color: #000096;
+    background: #3636FF;
     margin: 0px 175px
 }
 .form-control:hover {
     border-color: #fffacd; /* Синяя рамка при фокусе */
     box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
-    background: #0000BA; /* Градиентный фон */
+    background: #5555FF; /* Градиентный фон */
     transform: scale(1.01);
+}
+.form-control::placeholder {
+    color: #000000; /* Синий цвет плейсхолдера */
+    font-size: 14px;
 }
 
 

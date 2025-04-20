@@ -8,3 +8,4 @@ pillow
 django-allauth
 requests
 jwt
+rest_framework

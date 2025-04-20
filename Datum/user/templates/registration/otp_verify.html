@@ -1,8 +1,25 @@
-{% extends 'registration/base.html' %}
-{% block title %}Profile - YourApp {% endblock %}
-{% load socialaccount %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'user/css/otp_verify.css' %}">
+</head>
+
+<body>
     <!-- Form Section -->
+        <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="ggg" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
     <div class="container-login">
         <div class="row align-items-center justify-content-center" style="height: 70vh;">
             <div class="col-lg-3"></div>
@@ -24,4 +41,4 @@
             <div class="col-lg-3"></div>
         </div>
     </div>
-{% endblock %}
+    </body>

@@ -1,0 +1,68 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh; /* Высота на весь экран */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center; /* Центрирование по вертикали */
+    overflow: hidden; /* Скрытие скролла */
+    background: url('../img/fon.png');
+    background-size: cover;
+}
+
+.ggg{
+background: #ffffff;
+}
+
+form{
+display: flex;
+    flex-direction: column; /* Элементы друг под другом */
+    align-items: center; /* Центрирование по горизонтали */
+}
+
+.form-control {
+margin-top 100px;
+    color: black;
+    width: 200px; /* Ширина поля ввода */
+    padding: 5px;
+    border: 2px solid #2575fc; /* Синяя рамка */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
+    text-align: center;
+    border-color: #000096;
+    background: #3636FF;
+}
+.form-control:hover {
+    border-color: #fffacd; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #5555FF; /* Градиентный фон */
+    transform: scale(1.01);
+}
+.form-control::placeholder {
+    color: #000000; /* Синий цвет плейсхолдера */
+    font-size: 14px;
+}
+
+
+
+button {
+    width: 100px; /* Ширина кнопки */
+    padding: 10px;
+    background: #6a11cb; /* Фиолетовый фон */
+    color: #000000; /* Белый текст */
+    border-radius: 25px; /* Закругленная кнопка */
+    font-size: 16px;
+    cursor: pointer;
+    border-color: #000096; /* Синяя рамка при фокусе */
+    background: #0000BA; /* Градиентный фон */
+}
+
+button:hover {
+    border-color: #ffffff; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA;
+    transform: scale(1.01);
+}
