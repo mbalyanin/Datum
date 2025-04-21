@@ -11,6 +11,9 @@
                 <a href="{% url 'profile_edit' %}" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Редактировать
                 </a>
+                <a href="{% url 'view_profiles' %}" class="btn btn-success">
+                    <i class="fas fa-users"></i> Просмотр анкет
+                </a>
             </div>
 
             <div class="row">
@@ -22,7 +25,7 @@
                         <i class="fas fa-user-circle fa-5x mb-3 text-secondary"></i>
                     {% endif %}
 
-                    <h4>{{ request.user.get_full_name|default:request.user.name }}</h4>
+                    <h4>{{ request.user.name }}</h4>
                     <p class="text-muted">{{ request.user.email }}</p>
                 </div>
 
@@ -77,7 +80,22 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         {% if not request.user.mfa_enabled %}
-                            <a href="#" class="btn btn-sm btn-outline-primary">Включить 2FA</a>
+                            <div>
+                            <img src="{{ qrcode }}" alt="{{ img_path }}" width="80" height="80" >
+
+                            <form method="POST" action="{% url 'verify_mfa' %}" class="form text-center">
+                                {% csrf_token %}
+                                <div class="form-group text-">
+                                    <div class="mx-auto" style="width: 30%;">
+                                        <input type="text" id="otp_code" name="otp_code" maxlength="6" required
+                                               class="form-control" placeholder="Your OTP code">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="user_id" value="{{ request.user.id }}">
+                                <button class="btn btn-primary" type="submit">Включить 2FA</button>
+                            </form>
+
+                            </div>
                         {% else %}
                             <a href="{% url 'disable_2fa' %}" class="btn btn-sm btn-outline-danger">Отключить 2FA</a>
                         {% endif %}

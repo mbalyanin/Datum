@@ -10,7 +10,6 @@ from .forms import ProfileForm
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
-from django.views import View
 from .forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import redirect
 from .utils import send_email_for_verify
@@ -19,10 +18,17 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.contrib.auth.tokens import default_token_generator as token_generator
 from django.contrib import messages
-from django.urls import reverse_lazy
+from datetime import date
+from django.core.cache import cache
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, Count
+from dateutil.relativedelta import relativedelta
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 import pyotp
 import qrcode
-from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .models import Like
 # Create your views here.
 
 
@@ -215,3 +221,115 @@ def profile_edit(request):
         form = ProfileForm(instance=request.user)
 
     return render(request, 'user/profile_edit.html', {'form': form})
+
+
+@login_required
+def get_next_profile(request):
+    # Исключаем свою анкету и обработанные профили
+    excluded_ids = {
+        request.user.id,  # Своя анкета
+        *request.user.get_viewed_profiles(),  # Пропущенные
+        *request.user.get_liked_profiles()  # Лайкнутые
+    }
+
+    # 2. Алгоритм рекомендаций
+    profile = None
+
+    # Вариант A: из пула взаимных связей
+    likers = User.objects.filter(
+        sent_likes__receiver=request.user
+    ).values_list('id', flat=True)
+
+    if likers:
+        profile = (
+            User.objects.filter(
+                received_likes__sender__in=likers,
+                profile_complete=True
+            )
+            .exclude(id__in=excluded_ids)
+            .annotate(mutual_score=Count('received_likes'))
+            .order_by('-mutual_score', '?')
+            .first()
+        )
+
+    # Вариант B: случайные анкеты
+    if not profile:
+        candidates = (
+            User.objects.filter(
+                profile_complete=True,
+                gender=request.user.seeking,
+                birth_date__lte=date.today() - relativedelta(years=request.user.min_age),
+                birth_date__gte=date.today() - relativedelta(years=request.user.max_age)
+            )
+            .exclude(id__in=excluded_ids)
+            .order_by('?')
+        )
+
+        # Можно добавить дополнительные фильтры (город и т.д.)
+        if request.user.city:
+            candidates = candidates.filter(city__iexact=request.user.city)
+
+        profile = candidates.first()
+
+    # 3. Если совсем нет анкет - сбрасываем историю (кроме лайков)
+    if not profile and excluded_ids:
+        cache.delete(f'viewed_{request.user.id}')
+        new_excluded_ids = {
+            request.user.id,
+            *request.user.get_liked_profiles()  # Лайки остаются
+        }
+        profile = (
+            User.objects.filter(profile_complete=True)
+            .exclude(id__in=new_excluded_ids)
+            .order_by('?')
+            .first()
+        )
+
+    return profile
+@login_required
+def view_profiles(request):
+    profile = get_next_profile(request)
+
+    if not profile:
+        return render(request, 'user/no_profiles.html')
+
+    return render(request, 'user/profiles_list.html', {'profile': profile})
+
+
+@login_required
+@require_POST
+def process_profile(request, profile_id, action):
+    """Обрабатывает действие (лайк/пропуск)"""
+    profile = get_object_or_404(User, id=profile_id)
+
+    if action == 'like':
+        Like.objects.get_or_create(
+            sender=request.user,
+            receiver=profile
+        )
+        messages.success(request, "Лайк отправлен!")
+    elif action == 'skip':
+        request.user.add_viewed_profile(profile.id)
+
+    return redirect('view_profiles')
+@login_required
+@require_POST
+def like_profile(request, profile_id):
+    profile = get_object_or_404(User, id=profile_id)
+
+    # Создаем лайк
+    Like.objects.get_or_create(
+        sender=request.user,
+        receiver=profile
+    )
+
+    # Проверяем на взаимный лайк (мэтч)
+    if Like.objects.filter(sender=profile, receiver=request.user).exists():
+        messages.success(request, f"Это взаимный лайк! Вы понравились {profile.name}")
+
+    return redirect('view_profiles')
+@login_required
+@require_POST
+def skip_profile(request, profile_id):
+    # Просто перенаправляем на следующую анкету
+    return redirect('view_profiles')

@@ -1,6 +1,5 @@
 from django.urls import path, include
-from .views import SignUpView, EmailVerify, UserLoginView, MfaVerify, ProfileView,\
-    MfaDisable, profile_edit
+from .views import *
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -11,6 +10,10 @@ urlpatterns = [
     path('signup/', SignUpView.as_view(), name='signup'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/edit/', profile_edit, name='profile_edit'),
+    path('profile/view/', view_profiles, name='view_profiles'),
+    path('profile/<int:profile_id>/<str:action>/',
+         process_profile,
+         name='process_profile'),
     path('verify_mfa/', MfaVerify.as_view(), name='verify_mfa'),
     path('disable_2fa/', MfaDisable.as_view(), name='disable_2fa'),
 ]

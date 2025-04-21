@@ -2,9 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+from django.core.cache import cache
 
 # Create your models here.
-
 class User(AbstractUser):
      email = models.EmailField(
           _('email address'),
@@ -56,13 +57,28 @@ class User(AbstractUser):
      # Системные поля
      profile_complete = models.BooleanField(default=False, verbose_name='Анкета заполнена')
 
+     def get_viewed_profiles(self):
+          """Возвращает ID просмотренных профилей"""
+          return cache.get(f'viewed_{self.id}', [])
+
+     def add_viewed_profile(self, profile_id):
+          """Добавляет профиль в просмотренные"""
+          viewed = self.get_viewed_profiles()
+          viewed.append(profile_id)
+          cache.set(f'viewed_{self.id}', viewed, 60 * 60 * 24 * 30)  # Храним 30 дней
+
+     def get_liked_profiles(self):
+          """Возвращает ID лайкнутых профилей"""
+          return list(self.sent_likes.values_list('receiver_id', flat=True))
      @property
      def age(self):
           today = timezone.now().date()
-          born = self.birth_date
-          print(born)
-          age = today.year - born.year
-          if (today.month, today.day) < (born.month, born.day):
-               age -= 1
+          return relativedelta(today, self.birth_date).years
 
-          return age
+class Like(models.Model):
+    sender = models.ForeignKey(User, related_name='sent_likes', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_likes', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('sender', 'receiver')
