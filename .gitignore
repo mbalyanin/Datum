@@ -8,3 +8,7 @@ gen/
 __pycache__
 /venv
 /.idea
+Datum/avatars/*
+Datum/media/avatars/*
+Datum/db.sqlite3
+Datum/user/migrations/*

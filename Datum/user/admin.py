@@ -8,6 +8,7 @@ User = get_user_model()
 
 @admin.register(User)
 class UserAdmin(UserAdmin):
+    list_display = ("username", "email", 'birth_date')
     add_fieldsets = (
         (
             None,

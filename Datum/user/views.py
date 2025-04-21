@@ -5,7 +5,8 @@ from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileForm
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
@@ -198,3 +199,19 @@ class MfaDisable(LoginRequiredMixin, APIView):
         else:
             messages.info(request, "2FA is already disabled.")
         return redirect('profile')
+
+
+@login_required
+def profile_edit(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.profile_complete = True
+            user.save()
+            messages.success(request, 'Анкета успешно сохранена!')
+            return redirect('profile')  # Перенаправление на просмотр анкеты
+    else:
+        form = ProfileForm(instance=request.user)
+
+    return render(request, 'user/profile_edit.html', {'form': form})
