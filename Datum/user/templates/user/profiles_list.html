@@ -1,86 +1,41 @@
 {% extends 'registration/base.html' %}
+{% block title %}Profile - YourApp {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="mb-4">
-                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Назад в профиль
-                </a>
-            </div>
-            <!-- Карточка анкеты -->
-            <div class="card">
-                {% if profile.avatar %}
-                <img src="{{ profile.avatar.url }}" class="card-img-top profile-photo">
-                {% else %}
-                <div class="no-photo text-center py-4">
-                    <i class="fas fa-user-circle fa-5x"></i>
-                </div>
-                {% endif %}
+<div class="reg-containerqr">
 
-                <div class="card-body">
-                    <h3>{{ profile.name }}</h3>
-                    <p class="text-muted">
-                        {{ profile.age }} лет, {{ profile.city|default:"Город не указан" }}
-                    </p>
+    <!-- Карточка анкеты -->
+    <h4>{{ profile.name }}, {{ profile.age }}, {{ profile.city|default:"Город не указан" }}</h4>
+    {% if profile.avatar %}
+    <img src="{{ profile.avatar.url }}" class="card-img-top profile-photo" style="max-width: 400px; max-height: 800px;">
+    {% else %}
+    <i class="fas fa-user-circle fa-5x"></i>
+    {% endif %}
 
-                    <div class="mb-3">
-                        <strong>О себе:</strong>
-                        <p>{{ profile.bio|default:"Пользователь не добавил информацию" }}</p>
-                    </div>
+    <strong>О себе:</strong>
+    <p>{{ profile.bio|default:"Пользователь не добавил информацию" }}</p>
 
-                    {% if profile.hobbies %}
-                    <div class="mb-3">
-                        <strong>Интересы:</strong>
-                        <p>{{ profile.hobbies }}</p>
-                    </div>
-                    {% endif %}
+    {% if profile.hobbies %}
+    <strong>Интересы:</strong>
+    <p>{{ profile.hobbies }}</p>
+    {% endif %}
 
-                    <!-- Кнопки действий -->
-                    <div class="action-buttons">
-                        <form action="{% url 'process_profile' profile.id 'skip' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-times"></i> Пропустить
-                            </button>
-                        </form>
+    <!-- Кнопки действий -->
+    <div class="range-container">
+        <form action="{% url 'process_profile' profile.id 'skip' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn_circle btn-outline-secondary btn-lg">
+                <i class="fas fa-times"></i> ✋
+            </button>
+        </form>
 
-                        <form action="{% url 'process_profile' profile.id 'like' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-lg">
-                                <i class="fas fa-heart"></i> Лайк
-                            </button>
-                        </form>
-                    </div>
-
-                    <style>
-                        .action-buttons {
-                            display: flex;
-                            justify-content: center;
-                            gap: 20px;
-                            margin-top: 30px;
-                        }
-                        .btn-lg {
-                            padding: 10px 25px;
-                            font-size: 1.2rem;
-                        }
-                    </style>
-                </div>
-            </div>
-        </div>
+        <form action="{% url 'process_profile' profile.id 'like' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn_circle btn-outline-danger btn-lg">
+                <i class="fas fa-heart"></i> 💝
+            </button>
+        </form>
     </div>
 </div>
 
-<style>
-    .profile-photo {
-        height: 400px;
-        object-fit: cover;
-        object-position: center;
-    }
-    .no-photo {
-        background: #f8f9fa;
-        color: #6c757d;
-    }
-</style>
 {% endblock %}

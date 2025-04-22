@@ -1,23 +1,9 @@
 {% extends 'registration/base.html' %}
+{% block title %}Profile - YourApp {% endblock %}
 
 {% block content %}
-<div class="container text-center mt-5">
-    <div class="card">
-        <div class="card-body">
-            <h3 class="card-title">Нет новых анкет</h3>
-            <p class="card-text">
-                Вы просмотрели все доступные анкеты по вашим критериям.
-            </p>
-            
-            <div class="options mt-4">
-                <a href="{% url 'profile_edit' %}" class="btn btn-primary">
-                    <i class="fas fa-sliders-h"></i> Изменить критерии
-                </a>
-                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-user"></i> В профиль
-                </a>
-            </div>
-        </div>
-    </div>
+<div class="reg-containerqr">
+    <h4>Нет новых анкет 😞</h4>
+    <p>Вы просмотрели все доступные анкеты по вашим критериям. Может поменять их?</p>
 </div>
 {% endblock %}
