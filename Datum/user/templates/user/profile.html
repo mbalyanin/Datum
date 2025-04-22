@@ -3,110 +3,73 @@
 
 {% block content %}
 <div class="reg-container">
-    <div class="card mx-auto">
-        <div class="card-body">
-            <!-- Заголовок и кнопка редактирования -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="card-title">Мой профиль</h2>
-                <a href="{% url 'profile_edit' %}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Редактировать
-                </a>
-                <a href="{% url 'view_profiles' %}" class="btn btn-success">
-                    <i class="fas fa-users"></i> Просмотр анкет
-                </a>
-            </div>
+    <!-- Заголовок и кнопка редактирования -->
 
-            <div class="row">
-                <!-- Блок с аватаром -->
-                <div class="col-md-4 text-center">
-                    {% if request.user.avatar %}
-                        <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 200px;">
-                    {% else %}
-                        <i class="fas fa-user-circle fa-5x mb-3 text-secondary"></i>
-                    {% endif %}
+    <h2 class="card-title">Мой профиль</h2>
 
-                    <h4>{{ request.user.name }}</h4>
-                    <p class="text-muted">{{ request.user.email }}</p>
-                </div>
+    <!-- имэйл в верхнем левом углу -->
+    <p class="text-muted">{{ request.user.email }}</p>
 
-                <!-- Основная информация -->
-                <div class="col-md-8">
-                    <div class="card mb-3">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Основная информация</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Пол:</strong> {{ request.user.get_gender_display }}</p>
-                                    <p><strong>Дата рождения:</strong> {{ request.user.birth_date|date:"d.m.Y" }}</p>
-                                    <p><strong>Город:</strong> {{ request.user.city|default:"Не указан" }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>Дата регистрации:</strong> {{ request.user.date_joined|date:"d.m.Y" }}</p>
-                                    <p><strong>Ищу:</strong> {{ request.user.get_seeking_display }}</p>
-                                    <p><strong>Возрастной диапазон:</strong> {{ request.user.min_age }}-{{ request.user.max_age }} лет</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- О себе -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">О себе</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>{{ request.user.bio|default:"Пользователь пока не добавил информацию о себе" }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Хобби и интересы -->
-                    {% if request.user.hobbies %}
-                    <div class="card mb-3">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Хобби и интересы</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>{{ request.user.hobbies }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- 2FA и выход -->
-            <div class="mt-4 border-top pt-3">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        {% if not request.user.mfa_enabled %}
-                            <div>
-                            <img src="{{ qrcode }}" alt="{{ img_path }}" width="80" height="80" >
-
-                            <form method="POST" action="{% url 'verify_mfa' %}" class="form text-center">
-                                {% csrf_token %}
-                                <div class="form-group text-">
-                                    <div class="mx-auto" style="width: 30%;">
-                                        <input type="text" id="otp_code" name="otp_code" maxlength="6" required
-                                               class="form-control" placeholder="Your OTP code">
-                                    </div>
-                                </div>
-                                <input type="hidden" name="user_id" value="{{ request.user.id }}">
-                                <button class="btn btn-primary" type="submit">Включить 2FA</button>
-                            </form>
-
-                            </div>
-                        {% else %}
-                            <a href="{% url 'disable_2fa' %}" class="btn btn-sm btn-outline-danger">Отключить 2FA</a>
-                        {% endif %}
-                    </div>
-                    <form action="{% url 'logout' %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <!-- имя -->
+     <div class="just-box">
+        <h4>{{ request.user.name }}</h4>
     </div>
+    <div class="just-box">
+        <h4><strong>Дата регистрации:</strong> {{ request.user.date_joined|date:"d.m.Y" }}</h4>
+    </div>
+
+    <div class="just-box">
+        <!-- Блок с аватаром -->
+        {% if request.user.avatar %}
+            <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 800px;">
+        {% else %}
+            <i class="fas fa-user-circle fa-5x mb-3 text-secondary"></i>
+        {% endif %}
+    </div>
+
+
+    <!-- Основная информация -->
+    <h5 class="mb-0">Основная информация</h5>
+    <div class="just-box">
+        <div class="just-box">
+            <h4><strong>Пол:</strong> {{ request.user.get_gender_display }}</h4>
+        </div>
+        <div class="just-box">
+            <h4><strong>Дата рождения:</strong> {{ request.user.birth_date|date:"d.m.Y" }}</h4>
+        </div>
+        <div class="just-box">
+            <h4><strong>Город:</strong> {{ request.user.city|default:"Не указан" }}</h4>
+        </div>
+        <div class="just-box">
+            <h4><strong>Ищу:</strong> {{ request.user.get_seeking_display }}</h4>
+        </div>
+
+        <!-- О себе -->
+        <div class="just-box">
+            <h5 class="mb-0">О себе</h5>
+            <p>{{ request.user.bio|default:"Нечего сказать, я скучный" }}</p>
+        </div>
+
+        <!-- Хобби и интересы -->
+        <div class="just-box">
+            {% if request.user.hobbies %}
+            <h5 class="mb-0">Хобби и интересы</h5>
+            <p>{{ request.user.hobbies }}</p>
+            {% endif %}
+        </div>
+
+        </div>
+
+
+    <form action="{% url 'profile_edit' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Редактировать</button>
+    </form>
+
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
+    </form>
+
 </div>
 {% endblock %}

@@ -27,5 +27,27 @@
         {% block content %}{% endblock %}
     </div>
 
+<div class="left_box">
+     <form action="{% url 'profile' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Профиль</button>
+     </form>
+
+    <form action="{% url 'mfa' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Двойная аутентификация</button>
+    </form>
+
+    <form action="{% url 'view_profiles' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Искать женщин!</button>
+    </form>
+
+    <form action="{% url 'filters' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Фильтры</button>
+    </form>
+</div>
+
 </body>
 </html>

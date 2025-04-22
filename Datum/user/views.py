@@ -181,15 +181,15 @@ class MfaVerify(APIView):
         if self.verify_2fa_otp(user, otp):
             if request.user.is_authenticated:
                 messages.success(request, '2FA enabled successfully !')
-                return redirect('profile')
+                return redirect('mfa')
 
             login(request, user)
             messages.success(request, 'Login successful!')
-            return redirect('profile')
+            return redirect('mfa')
         else:
             if request.user.is_authenticated:
                 messages.error(request, 'Invalid OTP code. Please try again.')
-                return redirect('profile')
+                return redirect('mfa')
             messages.error(request, 'Invalid OTP code. Please try again.')
             return render(request, 'registration/otp_verify.html', {'user_id': user_id})
 
@@ -210,8 +210,12 @@ class MfaDisable(LoginRequiredMixin, APIView):
 @login_required
 def profile_edit(request):
     if request.method == 'POST':
+        print("akakak")
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        print(request.FILES)
+        print("edit ok")
         if form.is_valid():
+            print("edit if")
             user = form.save(commit=False)
             user.profile_complete = True
             user.save()
@@ -333,3 +337,59 @@ def like_profile(request, profile_id):
 def skip_profile(request, profile_id):
     # Просто перенаправляем на следующую анкету
     return redirect('view_profiles')
+
+
+
+
+
+
+
+class MfaView(APIView):
+    template_name = 'user/mfa.html'
+    def get(self, request):
+        user = request.user
+        if not user.mfa_secret:
+            user.mfa_secret = pyotp.random_base32()
+            user.save()
+
+        otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(
+            name=user.email,
+            issuer_name="Datum"
+        )
+        qr = qrcode.make(otp_uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format="PNG")
+
+        buffer.seek(0)
+        qr_code = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        qr_code_data_uri = f"data:image/png;base64,{qr_code}"
+
+        return render(request, self.template_name, {"qrcode": qr_code_data_uri})
+
+
+class TapeView(APIView):
+    template_name = 'user/tape.html'
+    def get(self, request):
+        return render(request, self.template_name)
+
+@login_required
+def filters_edit(request):
+    template_name = 'user/filters.html'
+    if request.method == 'POST':
+        print(request.FILES)
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        print("filters ok")
+        if form.is_valid():
+            print("filters if")
+            user = form.save(commit=False)
+            user.profile_complete = True
+            user.save()
+            messages.success(request, 'Анкета успешно сохранена!')
+            return redirect('profile')  # Перенаправление на просмотр анкеты
+        else:
+            messages.success(request, 'asdasdadsasdasdasdsad')
+    else:
+        form = ProfileForm(instance=request.user)
+
+    return render(request, template_name, {'form': form})
