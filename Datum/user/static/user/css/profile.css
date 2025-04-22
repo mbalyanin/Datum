@@ -1,6 +1,6 @@
  /* Add your custom styles here */
 body {
-    background: #111111;
+    background: url('../img/like_fon.png');
     background-size: cover;
 }
 
@@ -195,4 +195,19 @@ textarea {
 
 .invisible-box{
     display: none;
+}
+
+.btn_circle {
+    width: 50px;          /* Ширина и высота должны быть равны */
+    height: 50px;         /* Для идеального круга */
+    padding: 0;           /* Убираем внутренние отступы */
+    border-radius: 50%;    /* Ключевое свойство для круга */
+    background: #2b2b2b;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
