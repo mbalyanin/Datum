@@ -112,6 +112,8 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['birth_date'].widget.attrs['id'] = f'birth_date_{id(self)}'
+        print("inti okkkkk")
+        print( self.fields['birth_date'].widget.attrs['id'])
 
     def clean_birth_date(self):
         birth_date = self.cleaned_data.get('birth_date')
@@ -120,6 +122,7 @@ class ProfileForm(forms.ModelForm):
             age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
             if age < 18:
+                print("raise date birth")
                 raise forms.ValidationError("Вам должно быть не менее 18 лет")
         return birth_date
 
@@ -129,11 +132,14 @@ class ProfileForm(forms.ModelForm):
         cleaned_data = super().clean()
         name = self.cleaned_data.get('name')
         if len(name) == 0:
+            print("raise name")
             raise forms.ValidationError("Имя является обязательным полем")
+
         min_age = cleaned_data.get('min_age')
         max_age = cleaned_data.get('max_age')
 
         if min_age and max_age and min_age > max_age:
+            print("raise age")
             raise forms.ValidationError("Минимальный возраст не может быть больше максимального")
 
         return cleaned_data

@@ -1,0 +1,64 @@
+{% extends 'registration/base.html' %}
+{% block title %}Profile - YourApp {% endblock %}
+
+{% block content %}
+
+<div class="reg-container">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="filter-container">
+            <label class="form-label">Ищу</label>
+            {{form.seeking}}
+        </div>
+
+
+        <div class="filter-container">
+            <label>Возраст</label>
+            <div class="range-container">
+                <label>от</label>
+                {{ form.min_age }}
+                <label>до</label>
+                 {{ form.max_age }}
+            </div>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+
+        <div class="invisible-box">
+            <h4>Аватар</h4>
+            <div class="just-box">
+                {% if form.instance.avatar %}
+                    <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px;">
+                {% endif %}
+                {{ form.avatar }}
+            </div>
+            <div class="just-box">
+                <h4 class="form-label">Имя</h4>
+                {{ form.name }}
+            </div>
+            <div class="just-box">
+                <h4 class="form-label">Пол</h4>
+                {{ form.gender }}
+            </div>
+            <div class="just-box">
+                <h4>Дата рождения</h4>
+                {{ form.birth_date }}
+            </div>
+            <div class="just-box">
+                <h4>Город</h4>
+                {{ form.city }}
+            </div>
+            <div class="just-box">
+                <h4>О себе</h4>
+                {{ form.bio }}
+            </div>
+            <div class="just-box">
+                <h4>Хобби и интересы</h4>
+                {{ form.hobbies }}
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

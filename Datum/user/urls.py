@@ -16,4 +16,9 @@ urlpatterns = [
          name='process_profile'),
     path('verify_mfa/', MfaVerify.as_view(), name='verify_mfa'),
     path('disable_2fa/', MfaDisable.as_view(), name='disable_2fa'),
+
+    path('settings/', ProfileView.as_view(), name='settings'),
+    path('mfa/', MfaView.as_view(), name='mfa'),
+    path('tape/', TapeView.as_view(), name='tape'),
+    path('filters/', filters_edit, name='filters'),
 ]

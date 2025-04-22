@@ -2,76 +2,65 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Заполните вашу анкету</h2>
+<div class="reg-containered">
+    <h2>Редактирование анкеты</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Аватар</label>
-                    {% if form.instance.avatar %}
-                        <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 200px;">
-                    {% endif %}
-                    {{ form.avatar }}
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Имя</label>
-                    {{ form.name }}
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Пол</label>
-                    {{ form.gender }}
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Дата рождения</label>
-                    {{ form.birth_date }}
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Город</label>
-                    {{ form.city }}
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Ищу</label>
-                    {{ form.seeking }}
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Минимальный возраст</label>
-                            {{ form.min_age }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Максимальный возраст</label>
-                            {{ form.max_age }}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">О себе</label>
-                    {{ form.bio }}
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Хобби и интересы</label>
-                    {{ form.hobbies }}
-                </div>
-            </div>
+        <h4>Аватар</h4>
+        <div class="just-box">
+            {% if form.instance.avatar %}
+                <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px;">
+            {% endif %}
+            {{ form.avatar }}
         </div>
-        
-        <button type="submit" class="btn btn-primary">Сохранить анкету</button>
+
+        <div class="just-box">
+            <h4 class="form-label">Имя</h4>
+            {{ form.name }}
+        </div>
+
+        <div class="just-box">
+            <h4 class="form-label">Пол</h4>
+            {{ form.gender }}
+        </div>
+
+        <div class="just-box">
+            <h4>Дата рождения</h4>
+            {{ form.birth_date }}
+        </div>
+
+        <div class="just-box">
+            <h4>Город</h4>
+            {{ form.city }}
+        </div>
+
+        <div class="invisible-box">
+            <div class="just-box">
+                <h4>Ищу</h4>
+                {{ form.seeking }}
+            </div>
+            <div class="just-box">
+                <h4>Минимальный возраст</h4>
+                {{ form.min_age }}
+            </div>
+            <div class="just-box">
+                <h4>Максимальный возраст</h4>
+                {{ form.max_age }}
+            </div>
+         </div>
+
+        <div class="just-box">
+            <h4>О себе</h4>
+            {{ form.bio }}
+        </div>
+
+        <div class="just-box">
+            <h4>Хобби и интересы</h4>
+            {{ form.hobbies }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
 </div>
 {% endblock %}
