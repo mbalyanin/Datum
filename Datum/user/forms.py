@@ -112,34 +112,53 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['birth_date'].widget.attrs['id'] = f'birth_date_{id(self)}'
-        print("inti okkkkk")
-        print( self.fields['birth_date'].widget.attrs['id'])
 
-    def clean_birth_date(self):
-        birth_date = self.cleaned_data.get('birth_date')
+    def validate_required_fields(self, cleaned_data):
+        errors = {}
+        name = cleaned_data.get('name')
+        birth_date = cleaned_data.get('birth_date')
+
+        if not name:
+            errors['name'] = "Имя является обязательным полем"
+        if not birth_date:
+            errors['birth_date'] = "Дата рождения является обязательным полем"
+
         if birth_date:
             today = date.today()
             age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-
             if age < 18:
-                print("raise date birth")
-                raise forms.ValidationError("Вам должно быть не менее 18 лет")
-        return birth_date
+                errors['birth_date'] = "Вам должно быть не менее 18 лет"
 
-
+        if errors:
+            raise forms.ValidationError(errors)
 
     def clean(self):
         cleaned_data = super().clean()
-        name = self.cleaned_data.get('name')
-        if len(name) == 0:
-            print("raise name")
-            raise forms.ValidationError("Имя является обязательным полем")
 
+        # Проверяем обязательные поля
+        self.validate_required_fields(cleaned_data)
+
+        # Дополнительные проверки
         min_age = cleaned_data.get('min_age')
         max_age = cleaned_data.get('max_age')
-
         if min_age and max_age and min_age > max_age:
-            print("raise age")
-            raise forms.ValidationError("Минимальный возраст не может быть больше максимального")
+            raise forms.ValidationError({
+                'min_age': "Минимальный возраст не может быть больше максимального",
+                'max_age': "Максимальный возраст не может быть меньше минимального"
+            })
 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        try:
+            # Проверяем обязательные поля перед сохранением
+            self.validate_required_fields(self.cleaned_data)
+            user.profile_complete = True
+        except forms.ValidationError:
+            user.profile_complete = False
+
+        if commit:
+            user.save()
+        return user

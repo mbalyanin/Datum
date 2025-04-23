@@ -238,38 +238,45 @@ def get_next_profile(request):
 
     # 2. Алгоритм рекомендаций
     profile = None
+    base_filters = Q(
+        profile_complete=True,
+        gender=request.user.seeking if request.user.seeking != 'A' else Q(),
+        birth_date__lte=date.today() - relativedelta(years=request.user.min_age),
+        birth_date__gte=date.today() - relativedelta(years=request.user.max_age+1)
+    )
 
-    # Вариант A: из пула взаимных связей
-    likers = User.objects.filter(
-        sent_likes__receiver=request.user
-    ).values_list('id', flat=True)
+    # Вариант A: Находим пользователей с пересекающимися вкусами
+    # 1. Находим всех, кто лайкал тех же людей, что и текущий пользователь
+    users_with_similar_tastes = User.objects.filter(
+        sent_likes__receiver__in=request.user.sent_likes.values('receiver')
+    ).exclude(id=request.user.id).distinct()
 
-    if likers:
+    if users_with_similar_tastes.exists():
+        # 2. Находим кого лайкали эти пользователи (но не тех, кого уже лайкал текущий пользователь)
         profile = (
             User.objects.filter(
-                received_likes__sender__in=likers,
-                profile_complete=True
+                received_likes__sender__in=users_with_similar_tastes
             )
+            .exclude(
+                id__in=request.user.sent_likes.values('receiver')  # Исключаем уже лайкнутых
+            )
+            .filter(base_filters)
             .exclude(id__in=excluded_ids)
-            .annotate(mutual_score=Count('received_likes'))
-            .order_by('-mutual_score', '?')
+            .annotate(common_likers_count=Count('received_likes'))
+            .order_by('-common_likers_count', '?')
             .first()
         )
 
     # Вариант B: случайные анкеты
     if not profile:
         candidates = (
-            User.objects.filter(
-                profile_complete=True,
-                gender=request.user.seeking,
-                birth_date__lte=date.today() - relativedelta(years=request.user.min_age),
-                birth_date__gte=date.today() - relativedelta(years=request.user.max_age)
-            )
+            User.objects
+            .filter(base_filters)
             .exclude(id__in=excluded_ids)
             .order_by('?')
         )
 
-        # Можно добавить дополнительные фильтры (город и т.д.)
+        # Дополнительный фильтр по городу (если указан)
         if request.user.city:
             candidates = candidates.filter(city__iexact=request.user.city)
 
@@ -283,7 +290,8 @@ def get_next_profile(request):
             *request.user.get_liked_profiles()  # Лайки остаются
         }
         profile = (
-            User.objects.filter(profile_complete=True)
+            User.objects
+            .filter(base_filters)
             .exclude(id__in=new_excluded_ids)
             .order_by('?')
             .first()
@@ -292,6 +300,9 @@ def get_next_profile(request):
     return profile
 @login_required
 def view_profiles(request):
+    if not request.user.profile_complete:
+        return redirect('profile_edit')
+
     profile = get_next_profile(request)
 
     if not profile:
