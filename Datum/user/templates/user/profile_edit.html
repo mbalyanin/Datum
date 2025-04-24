@@ -10,7 +10,7 @@
         <h4>Аватар</h4>
         <div class="just-box">
             {% if form.instance.avatar %}
-                <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px;">
+                <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
             {% endif %}
             {{ form.avatar }}
         </div>

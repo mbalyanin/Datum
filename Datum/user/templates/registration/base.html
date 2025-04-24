@@ -33,19 +33,19 @@
             <button type="submit" class="btn">Профиль</button>
      </form>
 
-    <form action="{% url 'mfa' %}" method="get">
-            {% csrf_token %}
-            <button type="submit" class="btn">Двойная аутентификация</button>
-    </form>
-
     <form action="{% url 'view_profiles' %}" method="get">
             {% csrf_token %}
-            <button type="submit" class="btn">Искать женщин!</button>
+            <button type="submit" class="btn">Лента</button>
     </form>
 
     <form action="{% url 'filters' %}" method="get">
             {% csrf_token %}
             <button type="submit" class="btn">Фильтры</button>
+    </form>
+
+    <form action="{% url 'mfa' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Двойная аутентификация</button>
     </form>
 </div>
 

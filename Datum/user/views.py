@@ -1,7 +1,9 @@
 import io
 import base64
+from datetime import datetime
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -38,6 +40,11 @@ class ProfileView(LoginRequiredMixin, APIView):
     template_name = 'user/profile.html'
     login_url = '/user/login/'
     redirect_field_name = 'next'
+
+    @swagger_auto_schema(
+        operation_description="View profile with MFA QR code generation.",
+        responses={200: 'Returns rendered profile page with QR code.'}
+    )
     def get(self, request):
         user = request.user
         if not user.mfa_secret:
@@ -67,12 +74,29 @@ class SignUpView(APIView):
             return redirect('profile')  # Перенаправляем на профиль
         return super().dispatch(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Display signup form.",
+        responses={200: 'Signup form page.'}
+    )
     def get(self, request):
         context = {
             'form': UserCreationForm()
         }
         return render(request, self.template_name, context)
 
+    @swagger_auto_schema(
+        operation_description="Submit signup form.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'password1': openapi.Schema(type=openapi.TYPE_STRING),
+                'password2': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['email', 'password1', 'password2']
+        ),
+        responses={200: 'Signup success or form error'}
+    )
     def post(self, request):
         form = UserCreationForm(request.POST)
 
@@ -89,6 +113,10 @@ class SignUpView(APIView):
         return render(request, self.template_name, context)
 
 class EmailVerify(APIView):
+    @swagger_auto_schema(
+        operation_description="Verify email using uid and token.",
+        responses={302: 'Redirect to home or invalid verify page'}
+    )
     def get(self, request, uidb64, token):
         user = self.get_user(uidb64)
 
@@ -170,6 +198,22 @@ class MfaVerify(APIView):
             return True
         return False
 
+
+    @swagger_auto_schema(
+        operation_description="Verify MFA OTP code.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'otp_code': openapi.Schema(type=openapi.TYPE_STRING),
+                'user_id': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['otp_code', 'user_id']
+        ),
+        responses={
+            200: "Login success or invalid code",
+            400: "Invalid request or OTP"
+        }
+    )
     def post(self, request):
         otp = request.POST.get('otp_code')
         user_id = request.POST.get('user_id')
@@ -195,6 +239,10 @@ class MfaVerify(APIView):
 
 
 class MfaDisable(LoginRequiredMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Disable MFA for the current user.",
+        responses={302: "Redirects to profile with success or info message"}
+    )
     def get(self, request):
         user = request.user
         if user.mfa_enabled:
@@ -207,156 +255,225 @@ class MfaDisable(LoginRequiredMixin, APIView):
         return redirect('profile')
 
 
-@login_required
-def profile_edit(request):
-    if request.method == 'POST':
-        print("akakak")
+class ProfileEditAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    template_name = 'user/profile_edit.html'
+
+    @swagger_auto_schema(
+        operation_description="Отображение формы редактирования профиля",
+        responses={
+            200: openapi.Response(
+                description="Форма редактирования профиля",
+                examples={
+                    "application/html": {
+                        "description": "Рендеринг шаблона profile_edit.html с формой"
+                    }
+                }
+            )
+        }
+    )
+    def get(self, request):
+        form = ProfileForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
+
+    @swagger_auto_schema(
+        operation_description="Сохранение изменений профиля",
+        responses={
+            302: openapi.Response(
+                description="Перенаправление на просмотр профиля",
+                examples={
+                    "application/json": {
+                        "redirect_to": "profile"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Ошибка валидации формы",
+                examples={
+                    "application/html": {
+                        "description": "Рендеринг шаблона с ошибками формы"
+                    }
+                }
+            )
+        }
+    )
+    def post(self, request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
-        print(request.FILES)
-        print("edit ok")
+
         if form.is_valid():
-            print("edit if")
             user = form.save(commit=False)
             user.profile_complete = True
             user.save()
             messages.success(request, 'Анкета успешно сохранена!')
-            return redirect('profile')  # Перенаправление на просмотр анкеты
-    else:
-        form = ProfileForm(instance=request.user)
+            return redirect('profile')
 
-    return render(request, 'user/profile_edit.html', {'form': form})
+        # Логирование для отладки (можно удалить в продакшене)
+        print("Form errors:", form.errors)
+        print("Files received:", request.FILES)
+
+        return render(request, self.template_name, {'form': form}, status=400)
+
+
+def get_recommended_profiles(user, excluded_ids, base_filters):
+    user_liked_ids = list(user.sent_likes.values_list('receiver_id', flat=True))
+
+    users_with_common_likes = Like.objects.filter(
+        receiver_id__in=user_liked_ids
+    ).exclude(sender=user).values_list('sender_id', flat=True).distinct()
+
+    candidate_ids = Like.objects.filter(
+        sender_id__in=users_with_common_likes
+    ).exclude(receiver_id__in=user_liked_ids).values_list('receiver_id', flat=True)
+
+    return User.objects.filter(
+        id__in=candidate_ids
+    ).filter(base_filters).exclude(
+        id__in=excluded_ids
+    ).annotate(
+        like_count=Count('received_likes')
+    ).order_by('-like_count', '?')
 
 
 @login_required
 def get_next_profile(request):
-    # Исключаем свою анкету и обработанные профили
     excluded_ids = {
-        request.user.id,  # Своя анкета
-        *request.user.get_viewed_profiles(),  # Пропущенные
-        *request.user.get_liked_profiles()  # Лайкнутые
+        request.user.id,
+        *request.user.get_viewed_profiles(),
+        *request.user.get_liked_profiles(),
     }
 
-    # 2. Алгоритм рекомендаций
-    profile = None
     base_filters = Q(
         profile_complete=True,
         gender=request.user.seeking if request.user.seeking != 'A' else Q(),
         birth_date__lte=date.today() - relativedelta(years=request.user.min_age),
-        birth_date__gte=date.today() - relativedelta(years=request.user.max_age+1)
+        birth_date__gte=date.today() - relativedelta(years=request.user.max_age + 1)
     )
 
-    # Вариант A: Находим пользователей с пересекающимися вкусами
-    # 1. Находим всех, кто лайкал тех же людей, что и текущий пользователь
-    users_with_similar_tastes = User.objects.filter(
-        sent_likes__receiver__in=request.user.sent_likes.values('receiver')
-    ).exclude(id=request.user.id).distinct()
+    profile = get_recommended_profiles(request.user, excluded_ids, base_filters).first()
 
-    if users_with_similar_tastes.exists():
-        # 2. Находим кого лайкали эти пользователи (но не тех, кого уже лайкал текущий пользователь)
-        profile = (
-            User.objects.filter(
-                received_likes__sender__in=users_with_similar_tastes
-            )
-            .exclude(
-                id__in=request.user.sent_likes.values('receiver')  # Исключаем уже лайкнутых
-            )
-            .filter(base_filters)
-            .exclude(id__in=excluded_ids)
-            .annotate(common_likers_count=Count('received_likes'))
-            .order_by('-common_likers_count', '?')
-            .first()
-        )
-
-    # Вариант B: случайные анкеты
     if not profile:
-        candidates = (
-            User.objects
-            .filter(base_filters)
-            .exclude(id__in=excluded_ids)
-            .order_by('?')
-        )
-
-        # Дополнительный фильтр по городу (если указан)
+        candidates = User.objects.filter(base_filters).exclude(id__in=excluded_ids).order_by('?')
         if request.user.city:
             candidates = candidates.filter(city__iexact=request.user.city)
-
         profile = candidates.first()
 
-    # 3. Если совсем нет анкет - сбрасываем историю (кроме лайков)
     if not profile and excluded_ids:
         cache.delete(f'viewed_{request.user.id}')
-        new_excluded_ids = {
+        excluded_ids = {
             request.user.id,
-            *request.user.get_liked_profiles()  # Лайки остаются
+            *request.user.get_liked_profiles(),
         }
-        profile = (
-            User.objects
-            .filter(base_filters)
-            .exclude(id__in=new_excluded_ids)
-            .order_by('?')
-            .first()
-        )
+        profile = get_recommended_profiles(request.user, excluded_ids, base_filters).first()
+
+        if not profile:
+            profile = User.objects.filter(base_filters).exclude(id__in=excluded_ids).order_by('?').first()
 
     return profile
-@login_required
-def view_profiles(request):
-    if not request.user.profile_complete:
-        return redirect('profile_edit')
-
-    profile = get_next_profile(request)
-
-    if not profile:
-        return render(request, 'user/no_profiles.html')
-
-    return render(request, 'user/profiles_list.html', {'profile': profile})
 
 
-@login_required
-@require_POST
-def process_profile(request, profile_id, action):
-    """Обрабатывает действие (лайк/пропуск)"""
-    profile = get_object_or_404(User, id=profile_id)
+class ViewProfilesAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Замена @login_required
 
-    if action == 'like':
-        Like.objects.get_or_create(
-            sender=request.user,
-            receiver=profile
-        )
-        messages.success(request, "Лайк отправлен!")
-    elif action == 'skip':
-        request.user.add_viewed_profile(profile.id)
-
-    return redirect('view_profiles')
-@login_required
-@require_POST
-def like_profile(request, profile_id):
-    profile = get_object_or_404(User, id=profile_id)
-
-    # Создаем лайк
-    Like.objects.get_or_create(
-        sender=request.user,
-        receiver=profile
+    @swagger_auto_schema(
+        operation_description="Просмотр доступных профилей",
+        responses={
+            200: openapi.Response(
+                description="Успешное отображение профиля",
+                examples={
+                    "application/html": {
+                        "description": "Рендеринг шаблона profiles_list.html"
+                    }
+                }
+            ),
+            302: openapi.Response(
+                description="Перенаправление",
+                examples={
+                    "application/json": {
+                        "redirect_to": ["profile_edit", "no_profiles"]
+                    }
+                }
+            )
+        }
     )
+    def get(self, request):
+        # Проверка заполненности профиля
+        if not request.user.profile_complete:
+            messages.warning(request, "Пожалуйста, заполните свой профиль полностью")
+            return redirect('profile_edit')
 
-    # Проверяем на взаимный лайк (мэтч)
-    if Like.objects.filter(sender=profile, receiver=request.user).exists():
-        messages.success(request, f"Это взаимный лайк! Вы понравились {profile.name}")
+        # Получение следующего профиля
+        profile = get_next_profile(request)
 
-    return redirect('view_profiles')
-@login_required
-@require_POST
-def skip_profile(request, profile_id):
-    # Просто перенаправляем на следующую анкету
-    return redirect('view_profiles')
+        if not profile:
+            return render(request, 'user/no_profiles.html')
+
+        return render(request, 'user/profiles_list.html', {'profile': profile})
 
 
+class ProcessProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Замена @login_required
 
+    @swagger_auto_schema(
+        operation_description="Обработка действия (лайк/пропуск) для профиля",
+        manual_parameters=[
+            openapi.Parameter(
+                name='profile_id',
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_INTEGER,
+                description='ID профиля для действия',
+                required=True
+            ),
+            openapi.Parameter(
+                name='action',
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_STRING,
+                description='Тип действия (like/skip)',
+                enum=['like', 'skip'],
+                required=True
+            )
+        ],
+        responses={
+            302: openapi.Response(
+                description="Перенаправление на страницу просмотра профилей",
+                examples={
+                    "application/json": {
+                        "detail": "Перенаправление на view_profiles"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Профиль не найден",
+                examples={
+                    "application/json": {
+                        "detail": "Not found"
+                    }
+                }
+            )
+        }
+    )
+    def post(self, request, profile_id, action):
+        """Обрабатывает действие (лайк/пропуск)"""
+        profile = get_object_or_404(User, id=profile_id)
 
+        if action == 'like':
+            Like.objects.get_or_create(
+                sender=request.user,
+                receiver=profile
+            )
+            messages.success(request, "Лайк отправлен!")
+        elif action == 'skip':
+            request.user.add_viewed_profile(profile.id)
 
+        return redirect('view_profiles')
 
 
 class MfaView(APIView):
     template_name = 'user/mfa.html'
+
+    @swagger_auto_schema(
+        operation_description="Generate and return MFA QR code.",
+        responses={200: 'Rendered MFA setup page with QR code.'}
+    )
     def get(self, request):
         user = request.user
         if not user.mfa_secret:
@@ -381,26 +498,67 @@ class MfaView(APIView):
 
 class TapeView(APIView):
     template_name = 'user/tape.html'
+
+    @swagger_auto_schema(
+        operation_description="Render user's tape (feed).",
+        responses={200: 'Rendered tape page.'}
+    )
     def get(self, request):
         return render(request, self.template_name)
 
-@login_required
-def filters_edit(request):
+class FiltersEditAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Аналог @login_required
     template_name = 'user/filters.html'
-    if request.method == 'POST':
-        print(request.FILES)
+
+    @swagger_auto_schema(
+        operation_description="Редактирование фильтров профиля",
+        responses={
+            200: "Успешное отображение формы",
+            302: "Перенаправление после успешного сохранения",
+            400: "Неверные данные формы"
+        }
+    )
+    def get(self, request):
+        form = ProfileForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
+
+    @swagger_auto_schema(
+        operation_description="Сохранение фильтров профиля",
+        responses={
+            302: "Перенаправление после успешного сохранения",
+            400: "Неверные данные формы"
+        }
+    )
+    def post(self, request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
-        print("filters ok")
         if form.is_valid():
-            print("filters if")
             user = form.save(commit=False)
             user.profile_complete = True
             user.save()
             messages.success(request, 'Анкета успешно сохранена!')
-            return redirect('profile')  # Перенаправление на просмотр анкеты
+            return redirect('profile')
         else:
-            messages.success(request, 'asdasdadsasdasdasdsad')
-    else:
-        form = ProfileForm(instance=request.user)
+            messages.error(request, 'Ошибка при сохранении формы')
+            return render(request, self.template_name, {'form': form}, status=status.HTTP_400_BAD_REQUEST)
 
-    return render(request, template_name, {'form': form})
+
+def tracking_pixel(request):
+    print("-------TRACKING--------")
+    uid = request.GET.get('uid', 'unknown')
+    ip = request.META.get('REMOTE_ADDR')
+
+    print(datetime.now())
+    print("UID: ", uid)
+    print("IP: ", ip)
+
+    # Путь к пикселю (1x1 прозрачное PNG)
+    from PIL import Image
+    import os
+    from django.http import HttpResponse
+
+    image = Image.new('RGB', (50, 50), (255, 0, 0))
+    buffer = io.BytesIO()
+    image.save(buffer, format='PNG')
+    buffer.seek(0)
+
+    return HttpResponse(buffer.getvalue(), content_type='image/jpg')

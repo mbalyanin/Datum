@@ -21,7 +21,7 @@
     <div class="just-box">
         <!-- Блок с аватаром -->
         {% if request.user.avatar %}
-            <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 800px;">
+            <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 400px;">
         {% else %}
             <i class="fas fa-user-circle fa-5x mb-3 text-secondary"></i>
         {% endif %}

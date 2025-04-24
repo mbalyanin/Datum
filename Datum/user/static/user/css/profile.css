@@ -30,7 +30,7 @@ body {
     justify-content: center;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 420px;
+    top: 510px;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -101,7 +101,7 @@ button:hover {
 
 .text-muted {
     position: absolute;
-    top: 20px;
+    top: -5px;
     left: 10px;
 }
 
@@ -167,7 +167,7 @@ textarea {
     justify-content: center;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 420px;
+    top: 450px;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
