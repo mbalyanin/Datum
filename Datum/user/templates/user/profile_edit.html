@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="reg-containered">
+<div class="reg-container">
     <h2>Редактирование анкеты</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -11,6 +11,8 @@
         <div class="just-box">
             {% if form.instance.avatar %}
                 <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
+            {% else %}
+                <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
             {% endif %}
             {{ form.avatar }}
         </div>

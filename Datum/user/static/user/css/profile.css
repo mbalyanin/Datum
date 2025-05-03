@@ -30,9 +30,8 @@ body {
     justify-content: center;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 510px;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 20px;
+    left: 33%;
     text-align: center;
 }
 
@@ -153,43 +152,23 @@ textarea {
         text-align: center;
 }
 
-.reg-containered {
+.reg-containerlike {
     background: #222222;
     padding: 30px 40px;
     border: 1px solid #444444;
     border-radius: 5px;
     width: 450px;
     color: white;
-    min-height: 400px;
+    min-height: 500px;
+    max-height: 500px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 450px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.reg-containerqr {
-    background: #222222;
-    padding: 30px 40px;
-    border: 1px solid #444444;
-    border-radius: 5px;
-    width: 450px;
-    color: white;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-    position: absolute;
-    top: 350px;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 20px;
+    left: 33%;
     text-align: center;
 }
 
@@ -210,4 +189,92 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Анимация падения и исчезновения */
+@keyframes fallAndDisappear {
+    0% {
+        transform: translateX(100px) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(400px) rotate(-90deg) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(-50px) rotate(-90deg) scale(0);
+        opacity: 0;
+        display: none;
+    }
+}
+
+/* Класс, который будет применяться при клике */
+.reg-containerlike.fall-effect {
+    animation: fallAndDisappear 0.5s ease forwards;
+    transform-origin: bottom left; /* Точка вращения (нижний левый угол) */
+}
+
+/* Анимация падения и исчезновения */
+@keyframes fallAndDisappearLike {
+    0% {
+        transform: translateX(-100px) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-400px) rotate(90deg) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(50px) rotate(90deg) scale(0);
+        opacity: 0;
+        display: none;
+    }
+}
+
+/* Класс, который будет применяться при клике */
+.reg-containerlike.fall-effectLike {
+    animation: fallAndDisappearLike 0.5s ease forwards;
+    transform-origin: bottom right; /* Точка вращения (нижний левый угол) */
+}
+
+.btn_dis{
+    width: 50px;          /* Ширина и высота должны быть равны */
+    height: 50px;         /* Для идеального круга */
+    padding: 0;           /* Убираем внутренние отступы */
+    border-radius: 50%;    /* Ключевое свойство для круга */
+    background: #2b2b2b;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+
+    position: absolute;
+    top: 560px;
+    left: 29%;
+
+}
+
+.btn_like{
+    width: 50px;          /* Ширина и высота должны быть равны */
+    height: 50px;         /* Для идеального круга */
+    padding: 0;           /* Убираем внутренние отступы */
+    border-radius: 50%;    /* Ключевое свойство для круга */
+    background: #2b2b2b;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+
+    position: absolute;
+    top: 560px;
+    left: 68%;
+
 }

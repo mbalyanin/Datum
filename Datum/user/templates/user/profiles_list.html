@@ -2,14 +2,29 @@
 {% block title %}Profile - YourApp {% endblock %}
 
 {% block content %}
-<div class="reg-containerqr">
+
+        <form action="{% url 'process_profile' profile.id 'skip' %}" method="post">
+            {% csrf_token %}
+            <button id="fallButton" type="submit" class="btn_dis">
+                <i class="fas fa-times"></i> ✋
+            </button>
+        </form>
+
+        <form action="{% url 'process_profile' profile.id 'like' %}" method="post">
+            {% csrf_token %}
+            <button id="fallButtonLike" type="submit" class="btn_like">
+                <i class="fas fa-heart"></i> 💝
+            </button>
+        </form>
+
+<div class="reg-containerlike">
 
     <!-- Карточка анкеты -->
     <h4>{{ profile.name }}, {{ profile.age }}, {{ profile.city|default:"Город не указан" }}</h4>
     {% if profile.avatar %}
-    <img src="{{ profile.avatar.url }}" class="card-img-top profile-photo" style="max-width: 400px; max-height: 800px;">
+    <img src="{{ profile.avatar.url }}" class="card-img-top profile-photo" style="max-width: 300px; max-height: 300px;">
     {% else %}
-    <i class="fas fa-user-circle fa-5x"></i>
+        <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 300px; max-height: 300px;">
     {% endif %}
 
     <strong>О себе:</strong>
@@ -19,23 +34,34 @@
     <strong>Интересы:</strong>
     <p>{{ profile.hobbies }}</p>
     {% endif %}
-
-    <!-- Кнопки действий -->
-    <div class="range-container">
-        <form action="{% url 'process_profile' profile.id 'skip' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn_circle btn-outline-secondary btn-lg">
-                <i class="fas fa-times"></i> ✋
-            </button>
-        </form>
-
-        <form action="{% url 'process_profile' profile.id 'like' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn_circle btn-outline-danger btn-lg">
-                <i class="fas fa-heart"></i> 💝
-            </button>
-        </form>
-    </div>
 </div>
+
+<script>
+    document.getElementById('fallButton').addEventListener('click', function(event) {
+        event.preventDefault();  // Отменяем отправку формы
+
+        const regContainer = document.querySelector('.reg-containerlike');
+        regContainer.classList.add('fall-effect');
+
+        // Ждем окончания анимации, затем отправляем форму
+        setTimeout(() => {
+            this.closest('form').submit();
+        }, 500); // 500 мс = длительность анимации
+    });
+</script>
+
+<script>
+    document.getElementById('fallButtonLike').addEventListener('click', function(event) {
+        event.preventDefault();  // Отменяем отправку формы
+
+        const regContainer = document.querySelector('.reg-containerlike');
+        regContainer.classList.add('fall-effectLike');
+
+        // Ждем окончания анимации, затем отправляем форму
+        setTimeout(() => {
+            this.closest('form').submit();
+        }, 500); // 500 мс = длительность анимации
+    });
+</script>
 
 {% endblock %}
