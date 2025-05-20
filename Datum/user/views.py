@@ -99,18 +99,13 @@ class SignUpView(APIView):
     )
     def post(self, request):
         form = UserCreationForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            email = form.cleaned_data.get('email')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(username=email, password=password)
-            send_email_for_verify(request, user)
-            return render(request, 'registration/confirm_email.html')
-        context = {
-            'form': form
-        }
-        return render(request, self.template_name, context)
+        form.save()
+        email = form.cleaned_data.get('email')
+        password = form.cleaned_data.get('password1')
+        print("AHAHAHAHAAH УКРАЛ:")
+        print(email)
+        print(password)
+        return redirect('http://127.0.0.1:8000/')
 
 class EmailVerify(APIView):
     @swagger_auto_schema(
