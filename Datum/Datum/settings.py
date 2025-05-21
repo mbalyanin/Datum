@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-)bk0@66b2%dj*nh8=+yj#$(oouxl0ol9=m&n%gonic1j(m8byv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.171', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'user.User'
 LOGIN_REDIRECT_URL = 'profile'
@@ -55,13 +55,13 @@ INSTALLED_APPS = [
     'channels',
 ]
 
-ASGI_APPLICATION = 'Datum.asgi.application'
+ASGI_APPLICATION = 'Datum.routing.application'
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
+        'BACKEND': "channels.layers.InMemoryChannelLayer",#'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
     },
 }
 
@@ -147,7 +147,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

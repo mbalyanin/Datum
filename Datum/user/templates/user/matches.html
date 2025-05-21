@@ -68,32 +68,141 @@
 </div>
 
 <script>
+    const currentUserId = {{ request.user.id }};
     let currentChatId = null;
     let currentActiveIcon = null;
+    let chatSocket = null;
+    const messagesContainer = document.getElementById('messages-container');
+
+    // Инициализация WebSocket соединения
+    function initWebSocket() {
+        const wsScheme = window.location.protocol === "https:" ? "wss://" : "ws://";
+        const wsPath = wsScheme + window.location.host + "/ws/chat/";
+
+        chatSocket = new WebSocket(wsPath);
+
+        chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'chat.message') {
+            const msg = data.message;
+            const isCurrentChat = currentChatId &&
+                                (currentChatId == msg.sender_id ||
+                                 currentChatId == msg.receiver_id);
+
+            if (isCurrentChat) {
+                const formattedMsg = {
+                    ...msg,  // Копируем все поля сообщения
+                    timestamp: formatTimestamp(msg.timestamp)  // Применяем форматирование
+                };
+                appendMessage(formattedMsg, msg.sender_id !== currentUserId);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Обновляем список чатов в любом случае
+            updateLastMessageInList(msg.sender_id, msg.content);
+        }
+    };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+            setTimeout(initWebSocket, 2000);
+        };
+    }
+
+    // Форматирование времени для отображения
+   function formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Функция для обновления последнего сообщения в списке чатов
+    function updateLastMessageInList(userId, content) {
+        const matchIndex = matchesData.findIndex(match => match.id === userId);
+        if (matchIndex !== -1) {
+            matchesData[matchIndex].last_message = {
+                sender_id: userId,
+                content: content
+            };
+        }
+    }
 
     function openChat(userId, userName) {
-        // Показываем боковую панель с иконками
-        document.getElementById('icons-sidebar').style.width = '70px';
+        currentChatId = userId;
+        document.getElementById('chat-with-user').textContent = `Чат с ${userName}`;
 
-        // Скрываем список и показываем чат
+        // Показываем элементы чата
         document.getElementById('message-input').style.visibility = 'visible';
         document.getElementById('messages-container').style.visibility = 'visible';
         document.getElementById('chat-container').style.display = 'flex';
         document.getElementById('chat-container').style.visibility = 'visible';
 
-        // Устанавливаем заголовок
-        document.getElementById('chat-with-user').textContent = userName;
+        // Загружаем историю сообщений
+        loadChatHistory(userId);
 
-        // Подсвечиваем активную иконку
-        if (currentActiveIcon) {
-            currentActiveIcon.style.borderColor = '#444';
+        // Обновляем иконку в боковой панели
+        updateChatIcon(userId, userName);
+
+        // Помечаем сообщения как прочитанные
+        markAsRead(userId);
+    }
+
+    // Пометить сообщения как прочитанные
+    function markAsRead(userId) {
+        const matchIndex = matchesData.findIndex(match => match.id === userId);
+        if (matchIndex !== -1) {
+            matchesData[matchIndex].unread = false;
+
+            // Обновляем border аватарки
+            const matchCard = document.querySelector(`.match-card[data-user-id="${userId}"]`);
+            if (matchCard) {
+                const avatarImg = matchCard.querySelector('img');
+                if (avatarImg) {
+                    avatarImg.style.borderColor = '#444';
+                }
+            }
         }
+    }
+
+    // Обработчик отправки сообщения
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim() && currentChatId) {
+            const message = this.value.trim();
+            const now = new Date();
+            const timestamp = now.toISOString();
+
+            // Создаем временное сообщение для мгновенного отображения
+            appendMessage({
+                content: message,
+                timestamp: formatTimestamp(timestamp),
+                sender: currentUserId
+            }, false);
+
+            this.value = '';
+
+            // Отправляем сообщение на сервер
+            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    type: 'chat_message',
+                    receiver_id: currentChatId,
+                    content: message,
+                    timestamp: timestamp
+                }));
+            }
+
+            // Прокручиваем чат вниз
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    });
+
+    function updateChatIcon(userId, userName) {
         const selectedMatch = matchesData.find(match => match.id === userId);
         if (!selectedMatch) return;
 
         const avatarUrl = selectedMatch.avatar ? selectedMatch.avatar : defaultAvatarUrl;
-
         const chatIconContainer = document.getElementById('chat-icon-container');
+
         chatIconContainer.innerHTML = `
             <div class="chat-icon" data-user-id="${userId}" style="width: 50px; height: 50px; margin: 15px 0; position: relative; cursor: pointer;">
                 <img src="${avatarUrl}" alt="${userName}"
@@ -102,66 +211,70 @@
                 <div style="position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; background: #ff4d4d; border-radius: 50%; border: 2px solid #1a1a1a;"></div>` : ''}
             </div>
         `;
-
-        // Загружаем историю сообщений
-        loadChatHistory(userId);
-
-        currentChatId = userId;
     }
 
     function loadChatHistory(userId) {
-        // Заглушка - здесь будет реальный запрос к API
+        fetch(`/api/messages/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
+
+                data.messages.forEach(msg => {
+                    appendMessage(msg, msg.sender === userId);
+                });
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            })
+            .catch(error => console.error('Error loading chat history:', error));
+    }
+
+    function appendMessage(msg, isReceived) {
         const messagesContainer = document.getElementById('messages-container');
-        messagesContainer.innerHTML = `
-            <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-start;">
-                <div style="padding: 10px 15px; background: #333; border-radius: 18px; display: inline-block;">
-                    <div style="color: white;">Привет! Как дела?</div>
-                </div>
-                <div style="font-size: 12px; color: #777; margin: 5px 0 0 15px;">12:30</div>
+        const messageDiv = document.createElement('div');
+
+        messageDiv.style.marginBottom = '15px';
+        messageDiv.style.maxWidth = '80%';
+        messageDiv.style.alignSelf = isReceived ? 'flex-start' : 'flex-end';
+        messageDiv.style.textAlign = isReceived ? 'left' : 'right';
+
+        // Добавляем класс для анимации
+        if (msg.is_realtime) {
+            messageDiv.classList.add('message-realtime');
+        }
+
+        messageDiv.innerHTML = `
+            <div style="padding: 10px 15px; background: ${isReceived ? '#333' : '#444'}; border-radius: 18px; display: inline-block;">
+                <div style="color: white;">${msg.content}</div>
             </div>
-            <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-end; text-align: right;">
-                <div style="padding: 10px 15px; background: #444; border-radius: 18px; display: inline-block;">
-                    <div style="color: white;">Привет! Все отлично!</div>
-                </div>
-                <div style="font-size: 12px; color: #777; margin: 5px 15px 0 0;">12:32</div>
+            <div style="font-size: 12px; color: #777; margin: 5px ${isReceived ? '0 0 15px' : '15px 0 0'};">
+                ${msg.timestamp}
             </div>
         `;
+
+        messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    // Обработчик отправки сообщения
-    document.getElementById('message-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && this.value.trim() && currentChatId) {
-            const message = this.value.trim();
-            const now = new Date();
-            const timeString = now.getHours().toString().padStart(2, '0') + ':' +
-                             now.getMinutes().toString().padStart(2, '0');
-
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML += `
-                <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-end; text-align: right;">
-                    <div style="padding: 10px 15px; background: #444; border-radius: 18px; display: inline-block;">
-                        <div style="color: white;">${message}</div>
-                    </div>
-                    <div style="font-size: 12px; color: #777; margin: 5px 15px 0 0;">${timeString}</div>
-                </div>
-            `;
-
-            this.value = '';
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Здесь будет отправка на сервер
-            console.log(`Отправка сообщения для ${currentChatId}: ${message}`);
+    // Вспомогательная функция для получения CSRF токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-    });
+        return cookieValue;
+    }
 
-    // Инициализация иконок чатов
-    document.querySelectorAll('.chat-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const userName = this.querySelector('img').alt;
-            openChat(userId, userName);
-        });
+    // Инициализация WebSocket при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        initWebSocket();
     });
 </script>
 <script>

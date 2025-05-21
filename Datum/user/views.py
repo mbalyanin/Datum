@@ -1,8 +1,12 @@
 import io
+import logging
 import base64
 from datetime import datetime
+
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -30,7 +34,7 @@ from django.shortcuts import get_object_or_404
 import pyotp
 import qrcode
 
-from .models import Like, MatchNotification
+from .models import Like, MatchNotification, Message
 
 # Create your views here.
 
@@ -561,25 +565,20 @@ class FiltersEditAPIView(APIView):
 
 
 def tracking_pixel(request):
-    print("-------TRACKING--------")
+    logging.info("-------TRACKING--------")
     uid = request.GET.get('uid', 'unknown')
     ip = request.META.get('REMOTE_ADDR')
 
-    print(datetime.now())
-    print("UID: ", uid)
-    print("IP: ", ip)
+    logging.info(datetime.now())
+    logging.info(f"UID: {uid}")
+    logging.info(f"IP: {ip}")
 
     # Путь к пикселю (1x1 прозрачное PNG)
-    from PIL import Image
-    import os
     from django.http import HttpResponse
 
-    image = Image.new('RGB', (50, 50), (255, 0, 0))
-    buffer = io.BytesIO()
-    image.save(buffer, format='PNG')
-    buffer.seek(0)
+    with open("static/user/img/default_profile_pic.jpg", 'rb') as f:
+        return HttpResponse(f.read(), content_type='image/jpeg')
 
-    return HttpResponse(buffer.getvalue(), content_type='image/jpg')
 
 
 class MatchesView(APIView):
@@ -620,3 +619,59 @@ class NotificationsView(APIView):
     def get(self, request):
         notifications = request.user.notifications.order_by('-created_at')
         return render(request, self.template_name, {'notifications': notifications})
+
+
+class MessageAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        """Получить историю сообщений с пользователем"""
+        other_user = get_object_or_404(User, id=user_id)
+
+        # Помечаем сообщения как прочитанные
+        Message.objects.filter(
+            sender=other_user,
+            receiver=request.user,
+            is_read=False
+        ).update(is_read=True)
+
+        messages = Message.objects.filter(
+            (Q(sender=request.user) & Q(receiver=other_user)) |
+            (Q(sender=other_user) & Q(receiver=request.user))
+        ).order_by('timestamp')
+
+        return Response({
+            'messages': [
+                {
+                    'id': msg.id,
+                    'sender': msg.sender.id,
+                    'content': msg.content,
+                    'timestamp': timezone.localtime(msg.timestamp).strftime('%H:%M'),
+                    'is_read': msg.is_read
+                }
+                for msg in messages
+            ]
+        })
+
+    def post(self, request, user_id):
+        """Отправить сообщение пользователю"""
+        other_user = get_object_or_404(User, id=user_id)
+        content = request.data.get('content', '').strip()
+
+        if not content:
+            return Response({'error': 'Message cannot be empty'}, status=400)
+
+        message = Message.objects.create(
+            sender=request.user,
+            receiver=other_user,
+            content=content
+        )
+
+        return Response({
+            'status': 'success',
+            'message': {
+                'id': message.id,
+                'content': message.content,
+                'timestamp': timezone.localtime(message.timestamp).strftime("%H:%M"),
+            }
+        })

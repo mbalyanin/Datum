@@ -5,6 +5,8 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 
+import pytz
+
 # Create your models here.
 class User(AbstractUser):
      email = models.EmailField(
@@ -106,8 +108,10 @@ class ChatRoom(models.Model):
         unique_together = ('user1', 'user2')
 
 class Message(models.Model):
-    room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
+    class Meta:
+        ordering = ['timestamp']

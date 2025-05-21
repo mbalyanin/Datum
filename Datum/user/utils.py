@@ -12,6 +12,8 @@ from email.utils import formatdate, make_msgid
 
 import os
 
+import logging
+
 SMTP_SERVER="smtp.mail.ru"
 SMTP_PORT=587
 
@@ -54,9 +56,10 @@ def send_email_for_verify(request, user):
         'registration/verify_email.html',
         context=context,
     )
+    logging.info(message)
     email = EmailMessage(
         'Verify email',
         message,
         to=[user.email],
     )
-    email.send()
+    #email.send()
