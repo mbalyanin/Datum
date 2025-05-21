@@ -9,3 +9,5 @@ django-allauth
 requests
 jwt
 dateutils
+channels
+channels-redis

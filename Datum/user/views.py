@@ -30,7 +30,8 @@ from django.shortcuts import get_object_or_404
 import pyotp
 import qrcode
 
-from .models import Like
+from .models import Like, MatchNotification
+
 # Create your views here.
 
 
@@ -411,7 +412,7 @@ class ViewProfilesAPIView(APIView):
 
 
 class ProcessProfileAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Замена @login_required
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Обработка действия (лайк/пропуск) для профиля",
@@ -461,6 +462,20 @@ class ProcessProfileAPIView(APIView):
                 receiver=profile
             )
             messages.success(request, "Лайк отправлен!")
+
+            # Проверяем, есть ли взаимный лайк
+            if Like.objects.filter(sender=profile, receiver=request.user).exists():
+                # Создаем уведомление о взаимном лайке
+                MatchNotification.objects.get_or_create(
+                    user=request.user,
+                    matched_user=profile
+                )
+                MatchNotification.objects.get_or_create(
+                    user=profile,
+                    matched_user=request.user
+                )
+                messages.success(request, f"У вас взаимная симпатия с {profile.name}!")
+
         elif action == 'skip':
             request.user.add_viewed_profile(profile.id)
 
@@ -562,3 +577,43 @@ def tracking_pixel(request):
     buffer.seek(0)
 
     return HttpResponse(buffer.getvalue(), content_type='image/jpg')
+
+
+class MatchesView(APIView):
+    permission_classes = [IsAuthenticated]
+    template_name = 'user/matches.html'
+
+    @swagger_auto_schema(
+        operation_description="View mutual likes (matches)",
+        responses={200: 'Rendered matches page with mutual likes.'}
+    )
+    def get(self, request):
+        # Получаем ID пользователей, которым текущий пользователь поставил лайк
+        liked_users_ids = request.user.sent_likes.values_list('receiver_id', flat=True)
+
+        # Получаем пользователей, которые также поставили лайк текущему пользователю
+        mutual_likes = User.objects.filter(
+            sent_likes__receiver=request.user,
+            id__in=liked_users_ids
+        ).distinct()
+
+        # Помечаем уведомления как прочитанные
+        MatchNotification.objects.filter(
+            user=request.user,
+            matched_user__in=mutual_likes
+        ).update(is_read=True)
+
+        return render(request, self.template_name, {'matches': mutual_likes})
+
+
+class NotificationsView(APIView):
+    permission_classes = [IsAuthenticated]
+    template_name = 'user/notifications.html'
+
+    @swagger_auto_schema(
+        operation_description="View user notifications",
+        responses={200: 'Rendered notifications page.'}
+    )
+    def get(self, request):
+        notifications = request.user.notifications.order_by('-created_at')
+        return render(request, self.template_name, {'notifications': notifications})

@@ -1,0 +1,21 @@
+{% extends 'registration/base.html' %}
+
+{% block content %}
+<h1>Уведомления</h1>
+
+{% if notifications %}
+<ul class="notifications-list">
+    {% for notification in notifications %}
+    <li class="notification {% if not notification.is_read %}unread{% endif %}">
+        <p>
+            У вас взаимная симпатия с 
+            <a href="#">{{ notification.matched_user.name }}</a>!
+            <small>{{ notification.created_at|timesince }} назад</small>
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>У вас пока нет уведомлений.</p>
+{% endif %}
+{% endblock %}

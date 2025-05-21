@@ -4,11 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}YourApp{% endblock %}</title>
+    <title>{% block title %}Datum{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'user/css/profile.css' %}">
     <!-- Bootstrap CSS -->
-
+    <style>
+        .notification-badge {
+            background-color: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
 
@@ -23,6 +32,16 @@
     <form action="{% url 'view_profiles' %}" method="get">
             {% csrf_token %}
             <button type="submit" class="btn">Лента</button>
+    </form>
+
+    <form action="{% url 'matches' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">
+                Взаимные симпатии
+                {% if user.is_authenticated and user.get_unread_notifications_count > 0 %}
+                    <span class="notification-badge">{{ user.get_unread_notifications_count }}</span>
+                {% endif %}
+            </button>
     </form>
 
     <form action="{% url 'filters' %}" method="get">

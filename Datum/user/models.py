@@ -70,6 +70,11 @@ class User(AbstractUser):
      def get_liked_profiles(self):
           """Возвращает ID лайкнутых профилей"""
           return list(self.sent_likes.values_list('receiver_id', flat=True))
+
+     def get_unread_notifications_count(self):
+          if hasattr(self, 'notifications'):
+               return self.notifications.filter(is_read=False).count()
+          return 0
      @property
      def age(self):
           today = timezone.now().date()
@@ -82,3 +87,27 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ('sender', 'receiver')
+
+class MatchNotification(models.Model):
+    user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    matched_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+class ChatRoom(models.Model):
+    user1 = models.ForeignKey(User, related_name='chat_rooms1', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(User, related_name='chat_rooms2', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user1', 'user2')
+
+class Message(models.Model):
+    room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)

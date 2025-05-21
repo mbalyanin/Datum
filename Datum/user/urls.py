@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import *
 from django.views.generic import TemplateView
+from .api import get_or_create_chat, get_messages
 
 urlpatterns = [
     path('login/', UserLoginView.as_view(), name='login'),
@@ -14,6 +15,8 @@ urlpatterns = [
     path('profile/<int:profile_id>/<str:action>/',
          ProcessProfileAPIView.as_view(),
          name='process_profile'),
+    path('matches/', MatchesView.as_view(), name='matches'),
+    path('notifications/', NotificationsView.as_view(), name='notifications'),
     path('verify_mfa/', MfaVerify.as_view(), name='verify_mfa'),
     path('disable_2fa/', MfaDisable.as_view(), name='disable_2fa'),
 
@@ -23,4 +26,7 @@ urlpatterns = [
     path('filters/', FiltersEditAPIView.as_view(), name='filters'),
 
     path('track/', tracking_pixel, name='tracking_pixel'),
+
+    path('api/get_or_create_chat/', get_or_create_chat),
+    path('api/messages/', get_messages),
 ]

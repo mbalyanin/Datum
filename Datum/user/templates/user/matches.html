@@ -1,0 +1,163 @@
+{% extends 'registration/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="reg-container" style="width: 900px; min-height: 650px; display: flex; padding: 0;">
+    <!-- Боковая панель с иконками (изначально скрыта) -->
+    <div id="icons-sidebar" style="width: 0; overflow: hidden; transition: width 0.3s; background: #1a1a1a; display: flex; flex-direction: column; align-items: center;">
+        {% for match in matches %}
+        <div class="chat-icon" data-user-id="{{ match.id }}"
+             style="width: 50px; height: 50px; margin: 15px 0; position: relative; cursor: pointer;">
+            {% if match.avatar %}
+                <img src="{{ match.avatar.url }}" alt="{{ match.name }}"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #444;">
+            {% else %}
+                <img src="{% static 'user/img/default_profile_pic.jpg' %}"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #444;">
+            {% endif %}
+            {% if match.unread %}
+            <div style="position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; background: #ff4d4d; border-radius: 50%; border: 2px solid #1a1a1a;"></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Основная область -->
+    <div style="flex: 1; display: flex; flex-direction: column; border-left: 1px solid #444;">
+        <!-- Список симпатий (изначально виден) -->
+        <div id="matches-list" style="flex: 1; overflow-y: auto; background: #1a1a1a; padding: 20px;">
+            <h2 style="color: white; margin-bottom: 20px;">Ваши симпатии</h2>
+
+            {% for match in matches %}
+            <div class="match-card" data-user-id="{{ match.id }}" onclick="openChat({{ match.id }}, '{{ match.name }}')"
+                 style="display: flex; align-items: center; padding: 15px; margin-bottom: 15px; background: #222; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                {% if match.avatar %}
+                    <img src="{{ match.avatar.url }}" alt="{{ match.name }}"
+                         style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid {% if match.unread %}#ff4d4d{% else %}#444{% endif %};">
+                {% else %}
+                    <img src="{% static 'user/img/default_profile_pic.jpg' %}"
+                         style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid {% if match.unread %}#ff4d4d{% else %}#444{% endif %};">
+                {% endif %}
+                <div>
+                    <h2 style="margin: 0; color: white; font-size: 18px;">{{ match.name }}, {{ match.age }}</h2>
+                    <p style="margin: 5px 0 0; color: #aaa; font-size: 14px;">
+                        {% if match.last_message %}
+                            {% if match.last_message.sender.id == request.user.id %}
+                                Вы: {{ match.last_message.content|truncatechars:30 }}
+                            {% else %}
+                                {{ match.last_message.content|truncatechars:30 }}
+                            {% endif %}
+                        {% else %}
+                            Нет сообщений
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color: #777; text-align: center; padding: 40px 0;">У вас пока нет взаимных симпатий</p>
+            {% endfor %}
+        </div>
+
+        <!-- Окно чата (изначально скрыто) -->
+        <div id="chat-container" style="flex: 1; display: none; flex-direction: column; background: #1a1a1a;">
+            <!-- Заголовок чата -->
+            <div id="chat-header" style="padding: 15px; background: #222; border-bottom: 1px solid #444; display: flex; align-items: center;">
+                <h2 id="chat-with-user" style="margin: 0; color: white; font-size: 18px;">Выберите чат</h2>
+            </div>
+
+            <!-- История сообщений -->
+            <div id="messages-container" style="flex: 1; padding: 20px; overflow-y: auto;"></div>
+
+            <!-- Поле ввода -->
+            <div style="padding: 15px; background: #222; border-top: 1px solid #444;">
+                <input type="text" id="message-input" placeholder="Напишите сообщение..."
+                       style="width: 100%; padding: 12px; background: #000; color: white; border: 1px solid #444; border-radius: 4px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentChatId = null;
+    let currentActiveIcon = null;
+
+    function openChat(userId, userName) {
+        // Показываем боковую панель с иконками
+        document.getElementById('icons-sidebar').style.width = '70px';
+
+        // Скрываем список и показываем чат
+        document.getElementById('matches-list').style.display = 'none';
+        document.getElementById('chat-container').style.display = 'flex';
+
+        // Устанавливаем заголовок
+        document.getElementById('chat-with-user').textContent = userName;
+
+        // Подсвечиваем активную иконку
+        if (currentActiveIcon) {
+            currentActiveIcon.style.borderColor = '#444';
+        }
+        currentActiveIcon = document.querySelector(`.chat-icon[data-user-id="${userId}"] img`);
+        currentActiveIcon.style.borderColor = '#fff';
+
+        // Загружаем историю сообщений
+        loadChatHistory(userId);
+
+        currentChatId = userId;
+    }
+
+    function loadChatHistory(userId) {
+        // Заглушка - здесь будет реальный запрос к API
+        const messagesContainer = document.getElementById('messages-container');
+        messagesContainer.innerHTML = `
+            <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-start;">
+                <div style="padding: 10px 15px; background: #333; border-radius: 18px; display: inline-block;">
+                    <div style="color: white;">Привет! Как дела?</div>
+                </div>
+                <div style="font-size: 12px; color: #777; margin: 5px 0 0 15px;">12:30</div>
+            </div>
+            <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-end; text-align: right;">
+                <div style="padding: 10px 15px; background: #444; border-radius: 18px; display: inline-block;">
+                    <div style="color: white;">Привет! Все отлично!</div>
+                </div>
+                <div style="font-size: 12px; color: #777; margin: 5px 15px 0 0;">12:32</div>
+            </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Обработчик отправки сообщения
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim() && currentChatId) {
+            const message = this.value.trim();
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' +
+                             now.getMinutes().toString().padStart(2, '0');
+
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML += `
+                <div style="margin-bottom: 15px; max-width: 80%; align-self: flex-end; text-align: right;">
+                    <div style="padding: 10px 15px; background: #444; border-radius: 18px; display: inline-block;">
+                        <div style="color: white;">${message}</div>
+                    </div>
+                    <div style="font-size: 12px; color: #777; margin: 5px 15px 0 0;">${timeString}</div>
+                </div>
+            `;
+
+            this.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Здесь будет отправка на сервер
+            console.log(`Отправка сообщения для ${currentChatId}: ${message}`);
+        }
+    });
+
+    // Инициализация иконок чатов
+    document.querySelectorAll('.chat-icon').forEach(icon => {
+        icon.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.querySelector('img').alt;
+            openChat(userId, userName);
+        });
+    });
+</script>
+{% endblock %}
