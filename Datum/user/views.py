@@ -367,7 +367,10 @@ def get_next_profile(request):
         profile = get_recommended_profiles(request.user, excluded_ids, base_filters).first()
 
         if not profile:
-            profile = User.objects.filter(base_filters).exclude(id__in=excluded_ids).order_by('?').first()
+            candidates = User.objects.filter(base_filters).exclude(id__in=excluded_ids).order_by('?')
+            if request.user.city:
+                candidates = candidates.filter(city__iexact=request.user.city)
+            profile = candidates.first()
 
     return profile
 
