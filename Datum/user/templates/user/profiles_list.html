@@ -27,13 +27,15 @@
         <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 300px; max-height: 300px;">
     {% endif %}
 
-    <strong>О себе:</strong>
-    <p>{{ profile.bio|default:"Пользователь не добавил информацию" }}</p>
+    <div class="just-box" style="min-width: 500px;">
+        <strong>О себе:</strong>
+        <p>{{ profile.bio|default:"Пользователь не добавил информацию" }}</p>
 
-    {% if profile.hobbies %}
-    <strong>Интересы:</strong>
-    <p>{{ profile.hobbies }}</p>
-    {% endif %}
+        {% if profile.hobbies %}
+        <strong>Интересы:</strong>
+        <p>{{ profile.hobbies }}</p>
+        {% endif %}
+    </div>
 </div>
 
 <script>

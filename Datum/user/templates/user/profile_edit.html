@@ -2,64 +2,70 @@
 {% load static %}
 
 {% block content %}
-<div class="reg-container">
+<div class="reg-container" style="width: 800px; left: 21%;">
     <h2>Редактирование анкеты</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <h4>Аватар</h4>
-        <div class="just-box">
-            {% if form.instance.avatar %}
-                <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
-            {% else %}
-                <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
-            {% endif %}
-            {{ form.avatar }}
-        </div>
-
-        <div class="just-box">
-            <h4 class="form-label">Имя</h4>
-            {{ form.name }}
-        </div>
-
-        <div class="just-box">
-            <h4 class="form-label">Пол</h4>
-            {{ form.gender }}
-        </div>
-
-        <div class="just-box">
-            <h4>Дата рождения</h4>
-            {{ form.birth_date }}
-        </div>
-
-        <div class="just-box">
-            <h4>Город</h4>
-            {{ form.city }}
-        </div>
-
-        <div class="invisible-box">
-            <div class="just-box">
-                <h4>Ищу</h4>
-                {{ form.seeking }}
+        <div class="profileinfo-container" style="display: flex; flex-direction: row;">
+            <div class="firstinfo-container" style="padding-left: 5px; padding-right: 50px; padding-bottom: 30px;">
+                <h4 style="margin-top: 0; margin-bottom: 5px;"> Аватар</h4>
+                <div class="just-box">
+                    {% if form.instance.avatar %}
+                        <img src="{{ form.instance.avatar.url }}" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
+                    {% else %}
+                        <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
+                    {% endif %}
+                    {{ form.avatar }}
+                </div>
             </div>
-            <div class="just-box">
-                <h4>Минимальный возраст</h4>
-                {{ form.min_age }}
-            </div>
-            <div class="just-box">
-                <h4>Максимальный возраст</h4>
-                {{ form.max_age }}
-            </div>
-         </div>
 
-        <div class="just-box">
-            <h4>О себе</h4>
-            {{ form.bio }}
-        </div>
+            <div class="secondinfo-container">
+                <div class="just-box">
+                    <h4 class="form-label">Имя</h4>
+                    {{ form.name }}
+                </div>
 
-        <div class="just-box">
-            <h4>Хобби и интересы</h4>
-            {{ form.hobbies }}
+                <div class="just-box">
+                    <h4 class="form-label">Пол</h4>
+                    {{ form.gender }}
+                </div>
+
+                <div class="just-box">
+                    <h4>Дата рождения</h4>
+                    {{ form.birth_date }}
+                </div>
+
+                <div class="just-box">
+                    <h4>Город</h4>
+                    {{ form.city }}
+                </div>
+
+                <div class="invisible-box">
+                    <div class="just-box">
+                        <h4>Ищу</h4>
+                        {{ form.seeking }}
+                    </div>
+                    <div class="just-box">
+                        <h4>Минимальный возраст</h4>
+                        {{ form.min_age }}
+                    </div>
+                    <div class="just-box">
+                        <h4>Максимальный возраст</h4>
+                        {{ form.max_age }}
+                    </div>
+                 </div>
+
+                <div class="just-box">
+                    <h4>О себе</h4>
+                    {{ form.bio }}
+                </div>
+
+                <div class="just-box">
+                    <h4>Хобби и интересы</h4>
+                    {{ form.hobbies }}
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">Сохранить</button>

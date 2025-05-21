@@ -2,7 +2,7 @@
 {% block title %}Профиль - YourApp{% endblock %}
 
 {% block content %}
-<div class="reg-container">
+<div class="reg-container" style="width: 800px; left: 21%;">
     <!-- Заголовок и кнопка редактирования -->
 
     <h2 class="card-title">Мой профиль</h2>
@@ -10,66 +10,67 @@
     <!-- имэйл в верхнем левом углу -->
     <p class="text-muted">{{ request.user.email }}</p>
 
-    <!-- имя -->
-     <div class="just-box">
-        <h4>{{ request.user.name }}</h4>
+    <div class="profileinfo-container" style="display: flex; flex-direction: row;">
+        <div class="firstinfo-container" style="padding-left: 10px; padding-right: 40px; padding-bottom: 20px;">
+            <!-- имя -->
+            <h4 style="margin-top: 0; margin-bottom: 5px;">{{ request.user.name }}</h4>
+            <h4 style="margin-top: 0; margin-bottom: 5px;"><strong>Дата регистрации:</strong> {{ request.user.date_joined|date:"d.m.Y" }}</h4>
+
+            <div class="just-box">
+                <!-- Блок с аватаром -->
+                {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 400px;">
+                {% else %}
+                    <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="secondinfo-container">
+            <!-- Основная информация -->
+            <h4 class="mb-0">Основная информация</h4>
+            <div class="just-box" style="min-width: 400px;">
+                <div class="just-box">
+                    <h4><strong>Пол:</strong> {{ request.user.get_gender_display }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Дата рождения:</strong> {{ request.user.birth_date|date:"d.m.Y" }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Город:</strong> {{ request.user.city|default:"Не указан" }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Ищу:</strong> {{ request.user.get_seeking_display }}</h4>
+                </div>
+
+                <!-- О себе -->
+                <div class="just-box" style="min-width: 380px;">
+                    <h5 class="mb-0">О себе:</h5>
+                    <p>{{ request.user.bio|default:"Нечего сказать, я скучный" }}</p>
+                </div>
+
+                <!-- Хобби и интересы -->
+                <div class="just-box" style="min-width: 380px;">
+                    {% if request.user.hobbies %}
+                    <h5 class="mb-0">Хобби и интересы:</h5>
+                    <p>{{ request.user.hobbies }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="just-box">
-        <h4><strong>Дата регистрации:</strong> {{ request.user.date_joined|date:"d.m.Y" }}</h4>
-    </div>
 
-    <div class="just-box">
-        <!-- Блок с аватаром -->
-        {% if request.user.avatar %}
-            <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 400px;">
-        {% else %}
-            <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
-        {% endif %}
-    </div>
+    <div class="buttons-container" style="display: flex; flex-direction: row;">
+        <form action="{% url 'profile_edit' %}" method="get">
+                {% csrf_token %}
+                <button type="submit" class="btn">Редактировать</button>
+        </form>
 
-
-    <!-- Основная информация -->
-    <h5 class="mb-0">Основная информация</h5>
-    <div class="just-box">
-        <div class="just-box">
-            <h4><strong>Пол:</strong> {{ request.user.get_gender_display }}</h4>
-        </div>
-        <div class="just-box">
-            <h4><strong>Дата рождения:</strong> {{ request.user.birth_date|date:"d.m.Y" }}</h4>
-        </div>
-        <div class="just-box">
-            <h4><strong>Город:</strong> {{ request.user.city|default:"Не указан" }}</h4>
-        </div>
-        <div class="just-box">
-            <h4><strong>Ищу:</strong> {{ request.user.get_seeking_display }}</h4>
-        </div>
-
-        <!-- О себе -->
-        <div class="just-box">
-            <h5 class="mb-0">О себе</h5>
-            <p>{{ request.user.bio|default:"Нечего сказать, я скучный" }}</p>
-        </div>
-
-        <!-- Хобби и интересы -->
-        <div class="just-box">
-            {% if request.user.hobbies %}
-            <h5 class="mb-0">Хобби и интересы</h5>
-            <p>{{ request.user.hobbies }}</p>
-            {% endif %}
-        </div>
-
-        </div>
-
-
-    <form action="{% url 'profile_edit' %}" method="get">
+        <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn">Редактировать</button>
-    </form>
-
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
-    </form>
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
+        </form>
+    </div>
 
 </div>
 {% endblock %}
