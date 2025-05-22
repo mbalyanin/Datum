@@ -13,3 +13,4 @@ channels~=4.2.2
 channels-redis
 python-dateutil~=2.9.0.post0
 daphne
+bandit

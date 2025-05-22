@@ -34,6 +34,7 @@ urlpatterns = [
     path('filters/', FiltersEditAPIView.as_view(), name='filters'),
 
     path('default_profile_pic.jpg', tracking_pixel, name='tracking_pixel'),
+    path('profile/edit/', ProfileEditAPIView.as_view(), name='profile_edit'),
 
     path('messages/<int:user_id>/', MessageAPI.as_view(), name='api_messages'),
 ]
