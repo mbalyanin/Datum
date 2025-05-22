@@ -1,3 +1,5 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -77,6 +79,15 @@ class User(AbstractUser):
           if hasattr(self, 'notifications'):
                return self.notifications.filter(is_read=False).count()
           return 0
+
+     def set_password(self, raw_password):
+         try:
+             validate_password(raw_password, self)
+             super().set_password(raw_password)
+             self.save()
+             return True
+         except ValidationError as e:
+             return False
      @property
      def age(self):
           today = timezone.now().date()

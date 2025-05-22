@@ -1,3 +1,4 @@
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.urls import path, include
 from .views import *
 from django.views.generic import TemplateView
@@ -9,6 +10,14 @@ urlpatterns = [
     path('verify_email/<uidb64>/<token>/', EmailVerify.as_view(), name='verify_email'),
     path('signup/', SignUpView.as_view(), name='signup'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('profile/password_change/', PasswordChangeView.as_view(
+        template_name='registration/password_change.html',
+        success_url='/profile/password_change/done/'
+    ), name='password_change'),
+    path('profile/password_change/done/', PasswordChangeDoneView.as_view(
+             template_name='registration/password_change_done.html'
+         ),
+         name='password_change_done'),
     path('profile/edit/', ProfileEditAPIView.as_view(), name='profile_edit'),
     path('profile/view/', ViewProfilesAPIView.as_view(), name='view_profiles'),
     path('profile/<int:profile_id>/<str:action>/',

@@ -3,6 +3,7 @@ import logging
 import base64
 from datetime import datetime
 
+from django.contrib.auth.forms import PasswordChangeForm
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -14,7 +15,7 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.views import LoginView
 from .forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import redirect
@@ -576,10 +577,8 @@ def tracking_pixel(request):
     # Путь к пикселю (1x1 прозрачное PNG)
     from django.http import HttpResponse
 
-    with open("static/user/img/default_profile_pic.jpg", 'rb') as f:
+    with open(r"E:\БИП\Datum\Datum\user\default_profile_pic.jpg", 'rb') as f:
         return HttpResponse(f.read(), content_type='image/jpeg')
-
-
 
 class MatchesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -675,3 +674,4 @@ class MessageAPI(APIView):
                 'timestamp': timezone.localtime(message.timestamp).strftime("%H:%M"),
             }
         })
+

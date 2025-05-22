@@ -70,6 +70,7 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
         </form>
+        <a href="{% url 'password_change' %}" class="btn" target="_blank">Сменить пароль</a>
     </div>
 
 </div>
