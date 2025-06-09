@@ -5,6 +5,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from .utils import send_email_for_verify
+from datetime import date
 
 User = get_user_model()
 
@@ -87,3 +88,77 @@ class UserCreationForm(UserCreationForm):
             'name': "password",
             'type': "password",
         })
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'avatar', 'name', 'gender', 'birth_date', 'city',
+            'seeking', 'min_age', 'max_age', 'bio', 'hobbies'
+        ]
+        widgets = {
+            'birth_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'autocomplete': 'off'
+                }
+            ),
+            'bio': forms.Textarea(attrs={'rows': 5}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['birth_date'].widget.attrs['id'] = f'birth_date_{id(self)}'
+
+    def validate_required_fields(self, cleaned_data):
+        errors = {}
+        name = cleaned_data.get('name')
+        birth_date = cleaned_data.get('birth_date')
+
+        if not name:
+            errors['name'] = "Имя является обязательным полем"
+        if not birth_date:
+            errors['birth_date'] = "Дата рождения является обязательным полем"
+
+        if birth_date:
+            today = date.today()
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            if age < 18:
+                errors['birth_date'] = "Вам должно быть не менее 18 лет"
+
+        if errors:
+            raise forms.ValidationError(errors)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Проверяем обязательные поля
+        self.validate_required_fields(cleaned_data)
+
+        # Дополнительные проверки
+        min_age = cleaned_data.get('min_age')
+        max_age = cleaned_data.get('max_age')
+        if min_age and max_age and min_age > max_age:
+            raise forms.ValidationError({
+                'min_age': "Минимальный возраст не может быть больше максимального",
+                'max_age': "Максимальный возраст не может быть меньше минимального"
+            })
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        try:
+            # Проверяем обязательные поля перед сохранением
+            self.validate_required_fields(self.cleaned_data)
+            user.profile_complete = True
+        except forms.ValidationError:
+            user.profile_complete = False
+
+        if commit:
+            user.save()
+        return user

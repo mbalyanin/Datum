@@ -1,0 +1,69 @@
+{% extends 'registration/base.html' %}
+{% block title %}Profile - YourApp {% endblock %}
+
+{% block content %}
+
+        <form action="{% url 'process_profile' profile.id 'skip' %}" method="post">
+            {% csrf_token %}
+            <button id="fallButton" type="submit" class="btn_dis">
+                <i class="fas fa-times"></i> ✋
+            </button>
+        </form>
+
+        <form action="{% url 'process_profile' profile.id 'like' %}" method="post">
+            {% csrf_token %}
+            <button id="fallButtonLike" type="submit" class="btn_like">
+                <i class="fas fa-heart"></i> 💝
+            </button>
+        </form>
+
+<div class="reg-containerlike">
+
+    <!-- Карточка анкеты -->
+    <h4>{{ profile.name }}, {{ profile.age }}, {{ profile.city|default:"Город не указан" }}</h4>
+    {% if profile.avatar %}
+    <img src="{{ profile.avatar.url }}" class="card-img-top profile-photo" style="max-width: 300px; max-height: 300px;">
+    {% else %}
+        <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 300px; max-height: 300px;">
+    {% endif %}
+
+    <div class="just-box" style="min-width: 500px;">
+        <strong>О себе:</strong>
+        <p>{{ profile.bio|default:"Пользователь не добавил информацию" }}</p>
+
+        {% if profile.hobbies %}
+        <strong>Интересы:</strong>
+        <p>{{ profile.hobbies }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.getElementById('fallButton').addEventListener('click', function(event) {
+        event.preventDefault();  // Отменяем отправку формы
+
+        const regContainer = document.querySelector('.reg-containerlike');
+        regContainer.classList.add('fall-effect');
+
+        // Ждем окончания анимации, затем отправляем форму
+        setTimeout(() => {
+            this.closest('form').submit();
+        }, 500); // 500 мс = длительность анимации
+    });
+</script>
+
+<script>
+    document.getElementById('fallButtonLike').addEventListener('click', function(event) {
+        event.preventDefault();  // Отменяем отправку формы
+
+        const regContainer = document.querySelector('.reg-containerlike');
+        regContainer.classList.add('fall-effectLike');
+
+        // Ждем окончания анимации, затем отправляем форму
+        setTimeout(() => {
+            this.closest('form').submit();
+        }, 500); // 500 мс = длительность анимации
+    });
+</script>
+
+{% endblock %}

@@ -1,47 +1,78 @@
 {% extends 'registration/base.html' %}
-{% block title %}Profile - YourApp {% endblock %}
+{% block title %}Профиль - YourApp{% endblock %}
 
 {% block content %}
-<div class="reg-container">
+<div class="reg-container" style="width: 800px; left: 21%;">
+    <!-- Заголовок и кнопка редактирования -->
 
-<div class="card mx-auto" >
-    <div class="card-body text-center">
-        <i class="fas fa-user-circle fa-5x mb-3 rounded-circle"></i>
-        <h3>{{ request.user.email }}</h3>
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn">Выйти</button>
-        </form>
-        <p>Member since: {{ request.user.date_joined }}</p>
-        {% if not request.user.mfa_enabled %}
-        <h4>
-            Enable 2FA with Autheticator App.
-        </h4>
-            <div>
-                <img src="{{ qrcode }}" alt="{{ img_path }}">
+    <h2 class="card-title">Мой профиль</h2>
 
-                <form method="POST" action="{% url 'verify_mfa' %}" class="form text-center">
-                    {% csrf_token %}
-                    <div class="form-group text-">
-                        <div class="mx-auto" style="width: 30%;">
-                            <input type="text" id="otp_code" name="otp_code" maxlength="6" required
-                                   class="form-control" placeholder="Your OTP code">
-                        </div>
-                    </div>
-                    <input type="hidden" name="user_id" value="{{ request.user.id }}">
-                    <button class="btn btn-primary" type="submit">Verify</button>
-                </form>
+    <!-- имэйл в верхнем левом углу -->
+    <p class="text-muted">{{ request.user.email }}</p>
 
+    <div class="profileinfo-container" style="display: flex; flex-direction: row;">
+        <div class="firstinfo-container" style="padding-left: 10px; padding-right: 40px; padding-bottom: 20px;">
+            <!-- имя -->
+            <h4 style="margin-top: 0; margin-bottom: 5px;">{{ request.user.name }}</h4>
+            <h4 style="margin-top: 0; margin-bottom: 5px;"><strong>Дата регистрации:</strong> {{ request.user.date_joined|date:"d.m.Y" }}</h4>
+
+            <div class="just-box">
+                <!-- Блок с аватаром -->
+                {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" class="img-fluid rounded-circle mb-3" style="max-width: 400px; max-height: 400px;">
+                {% else %}
+                    <img src="/static/user/img/default_profile_pic.jpg" class="img-thumbnail mb-2" style="max-width: 400px; max-height: 400px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="secondinfo-container">
+            <!-- Основная информация -->
+            <h4 class="mb-0">Основная информация</h4>
+            <div class="just-box" style="min-width: 400px;">
+                <div class="just-box">
+                    <h4><strong>Пол:</strong> {{ request.user.get_gender_display }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Дата рождения:</strong> {{ request.user.birth_date|date:"d.m.Y" }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Город:</strong> {{ request.user.city|default:"Не указан" }}</h4>
+                </div>
+                <div class="just-box">
+                    <h4><strong>Ищу:</strong> {{ request.user.get_seeking_display }}</h4>
                 </div>
 
-        {% else %}
-        <a href="{% url 'disable_2fa' %}" class="btn btn-success" disabled>
-            Disable 2FA
-        </a>
-        {% endif %}
+                <!-- О себе -->
+                <div class="just-box" style="min-width: 380px;">
+                    <h5 class="mb-0">О себе:</h5>
+                    <p>{{ request.user.bio|default:"Нечего сказать, я скучный" }}</p>
+                </div>
 
-    </div>
-</div>
+                <!-- Хобби и интересы -->
+                <div class="just-box" style="min-width: 380px;">
+                    {% if request.user.hobbies %}
+                    <h5 class="mb-0">Хобби и интересы:</h5>
+                    <p>{{ request.user.hobbies }}</p>
+                    {% endif %}
+                </div>
             </div>
+        </div>
+    </div>
 
+    <div class="buttons-container" style="display: flex; flex-direction: row;">
+        <form action="{% url 'profile_edit' %}" method="get">
+                {% csrf_token %}
+                <button type="submit" class="btn">Редактировать</button>
+        </form>
+
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Выйти</button>
+        </form>
+    </div>
+    <a href="{% url 'password_change' %}" class="btn" target="_blank" style="text-decoration: none;">Сменить пароль</a>
+
+
+</div>
 {% endblock %}

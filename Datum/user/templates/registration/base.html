@@ -4,28 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}YourApp{% endblock %}</title>
+    <title>{% block title %}Datum{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'user/css/profile.css' %}">
     <!-- Bootstrap CSS -->
-
+    <style>
+        .notification-badge {
+            background-color: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Main Content -->
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        {% block content %}{% endblock %}
-    </div>
+{% block content %}{% endblock %}
+
+<div class="left_box">
+     <form action="{% url 'profile' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Профиль</button>
+     </form>
+
+    <form action="{% url 'view_profiles' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Лента</button>
+    </form>
+
+    <form action="{% url 'matches' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">
+                Взаимные симпатии
+                {% if user.is_authenticated and user.get_unread_notifications_count > 0 %}
+                    <span class="notification-badge">{{ user.get_unread_notifications_count }}</span>
+                {% endif %}
+            </button>
+    </form>
+
+    <form action="{% url 'filters' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Фильтры</button>
+    </form>
+
+    <form action="{% url 'mfa' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn">Двухфакторная аутентификация</button>
+    </form>
+</div>
 
 </body>
 </html>

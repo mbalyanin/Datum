@@ -1,0 +1,223 @@
+/* Общие стили для всей страницы */
+
+ .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .images-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            align-items: center;
+            justify-items: center;
+            padding-left: 100px; /* Отступ от правого края */
+            animation: slideIn 4s ease-in-out; /* Анимация появления */
+        }
+
+        .image-item {
+            width: 100%;
+            height: 100%;
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover {
+            transform: scale(1.5);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .login-section {
+            width: 400px;
+            padding-right: 80px; /* Отступ от правого края */
+            padding-left: 200px; /* Отступ от правого края */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh; /* Высота на весь экран */
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center; /* Центрирование по вертикали */
+    overflow: hidden; /* Скрытие скролла */
+    background: url('../img/fon.png');
+    background-size: cover;
+}
+
+/* Контейнер для формы входа */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1s ease-in-out; /* Анимация появления */
+}
+
+/* Окно логина (горизонтально вытянутый овал) */
+.login-box {
+    background: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+    padding: 40px;
+    background: #0000A7; /* Градиентный фон */
+    border-radius: 50px; /* Закругленные углы */
+    width: 400px; /* Ширина формы */
+    height: 300px; /* Высота формы */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрирование по вертикали */
+    align-items: center; /* Центрирование по горизонтали */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2); /* Тень */
+    animation: slideIn 0.5s ease-in-out; /* Анимация появления */
+    text-align: center;
+    position: relative; /* Для позиционирования внутренних элементов */
+}
+
+/* Заголовок формы */
+.login-box h2 {
+    margin-bottom: 20px;
+    color: #000000; /* Цвет текста */
+    font-size: 24px;
+    position: absolute; /* Фиксированное позиционирование */
+    top: 20px; /* Отступ сверху */
+    left: 50%; /* Центрирование по горизонтали */
+    transform: translateX(-50%); /* Точное центрирование */
+}
+
+/* Общие стили для групп полей ввода */
+.input-group {
+    margin-bottom: 15px;
+    width: 100%; /* Ширина полей ввода */
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center; /* Центрирование по вертикали */
+}
+
+/* Стили для поля ввода логина */
+.input-group.username-group input {
+    width: 250px; /* Ширина поля ввода */
+    padding: 10px;
+    border: 2px solid #6a11cb; /* Фиолетовая рамка */
+    border-radius: 0px; /* Закругленные углы */
+    font-size: 16px;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
+    outline: none;
+    border-color: #000096; /* Синяя рамка при фокусе */
+    background: #0000BA; /* Градиентный фон */
+}
+
+.input-group.username-group input::placeholder {
+    color: #000000; /* Фиолетовый цвет плейсхолдера */
+    font-size: 14px;
+}
+
+.input-group.username-group input:hover {
+    border-color: #fffacd; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA; /* Градиентный фон */
+    transform: scale(1.01);
+}
+
+/* Стили для поля ввода пароля */
+.input-group.password-group input {
+    width: 250px; /* Ширина поля ввода */
+    padding: 10px;
+    border: 2px solid #2575fc; /* Синяя рамка */
+    border-radius: 0px; /* Закругленные углы */
+    font-size: 16px;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease; /* Плавные переходы */
+    outline: none;
+    border-color: #000096; /* Синяя рамка при фокусе */
+    background: #0000BA; /* Градиентный фон */
+}
+
+.input-group.password-group input::placeholder {
+    color: #000000; /* Синий цвет плейсхолдера */
+    font-size: 14px;
+}
+
+.input-group.password-group input:hover {
+    border-color: #fffacd; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA; /* Градиентный фон */
+    transform: scale(1.01);
+}
+
+/* Кнопка входа */
+button {
+    width: 100px; /* Ширина кнопки */
+    padding: 10px;
+    background: #6a11cb; /* Фиолетовый фон */
+    color: #000000; /* Белый текст */
+    border-radius: 25px; /* Закругленная кнопка */
+    font-size: 16px;
+    cursor: pointer;
+    border-color: #000096; /* Синяя рамка при фокусе */
+    background: #0000BA; /* Градиентный фон */
+}
+
+button:hover {
+    border-color: #ffffff; /* Синяя рамка при фокусе */
+    box-shadow: 0 0 20px rgba(246,177,246, 1); /* Тень при фокусе */
+    background: #0000BA;
+    transform: scale(1.01);
+}
+
+/* Ссылка на регистрацию */
+.register-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555; /* Серый цвет текста */
+    position: absolute; /* Фиксированное позиционирование */
+    bottom: 20px; /* Отступ снизу */
+    left: 50%; /* Центрирование по горизонтали */
+    transform: translateX(-50%); /* Точное центрирование */
+}
+
+.register-link a {
+    color: #6a11cb; /* Фиолетовый цвет ссылки */
+    text-decoration: none; /* Убрать подчеркивание */
+    transition: color 0.3s ease; /* Плавный переход цвета */
+}
+
+.register-link a:hover {
+    color: #2575fc; /* Синий цвет при наведении */
+}
+
+/* Анимация появления формы */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Анимация появления формы сверху */
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
