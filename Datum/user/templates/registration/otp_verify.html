@@ -8,18 +8,6 @@
     <link rel="stylesheet" href="{% static 'user/css/otp_verify.css' %}">
 </head>
 
-    <!-- Form Section -->
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="ggg" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-        {% block content %}{% endblock %}
-    </div>
-
     <div class="reg-container">
             <form method="POST" action="{% url 'verify_mfa' %}">
                 {% csrf_token %}

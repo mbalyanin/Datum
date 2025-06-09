@@ -22,17 +22,6 @@
                 {% endif %}
                 <div>
                     <h2 style="margin: 0; color: white; font-size: 18px;">{{ match.name }}, {{ match.age }}</h2>
-                    <p style="margin: 5px 0 0; color: #aaa; font-size: 14px;">
-                        {% if match.last_message %}
-                            {% if match.last_message.sender.id == request.user.id %}
-                                Вы: {{ match.last_message.content|truncatechars:30 }}
-                            {% else %}
-                                {{ match.last_message.content|truncatechars:30 }}
-                            {% endif %}
-                        {% else %}
-                            Нет сообщений
-                        {% endif %}
-                    </p>
                 </div>
             </div>
             {% empty %}
